@@ -14,8 +14,7 @@ This project is licensed under the Creative Commons Attribution-NonCommercial 4.
 
 Commercial use is not permitted without explicit permission from the author.
 
-For commercial licensing inquiries, contact Moae (Moaesaycto):  
-➡ [moaesaycto.github.io/#/contact](https://moaesaycto.github.io/#/contact)
+For commercial licensing inquiries, contact Moae (Moaesaycto): [moaesaycto.github.io/#/contact](https://moaesaycto.github.io/#/contact)
 
 See the full [LICENSE](./LICENSE) file for details.
 
