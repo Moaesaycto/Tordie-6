@@ -1,105 +1,98 @@
 import {
     Menubar,
-    MenubarCheckboxItem,
-    MenubarContent,
-    MenubarItem,
     MenubarMenu,
-    MenubarRadioGroup,
-    MenubarRadioItem,
-    MenubarSeparator,
-    MenubarShortcut,
     MenubarSub,
-    MenubarSubContent,
-    MenubarSubTrigger,
-    MenubarTrigger,
 } from "@/components/ui/menubar"
-import { Theme, useTheme } from "@/components/theme-provider"
+
+import { useTheme } from "@/components/theme-provider"
 import { useStatus } from "@/components/status-provider"
+import { TextSize, Theme } from "@/types"
+import { formatKeyHint, useKeyHint } from "@/lib/format"
+import { CompactCheckboxItem, CompactContent, CompactItem, compactMenubarStyles, CompactRadioGroup, CompactSeparator, CompactSubContent, CompactSubTrigger, CompactTrigger } from "./compact-menubar-items"
 
 export function HeaderMenubar() {
-    const { theme, setTheme } = useTheme()
+    return (
+        <Menubar className="rounded-none w-full p-0 gap-0 h-auto min-h-0" loop>
+            <FileMenu />
+            <ViewMenu />
+        </Menubar>
+    )
+}
+
+const FileMenu = () => {
+    const modKey = useKeyHint()
+
+    return (
+        <MenubarMenu>
+            <CompactTrigger>File</CompactTrigger>
+            <CompactContent>
+                <CompactItem shortcut={formatKeyHint([modKey, "t"])}>
+                    Example
+                </CompactItem>
+                <CompactSeparator />
+                <CompactItem disabled>Disabled</CompactItem>
+            </CompactContent>
+        </MenubarMenu>
+    )
+}
+
+const ViewMenu = () => {
+    const { theme, setTheme, textSize, setTextSize } = useTheme()
     const { devMode, setDevMode } = useStatus()
 
     return (
-        <Menubar className="rounded-none">
-            <MenubarMenu>
-                <MenubarTrigger className="m-0">File</MenubarTrigger>
-                <MenubarContent>
-                    <MenubarItem>
-                        New Tab <MenubarShortcut>⌘T</MenubarShortcut>
-                    </MenubarItem>
-                    <MenubarItem>
-                        New Window <MenubarShortcut>⌘N</MenubarShortcut>
-                    </MenubarItem>
-                    <MenubarItem disabled>New Incognito Window</MenubarItem>
-                    <MenubarSeparator />
-                    <MenubarSub>
-                        <MenubarSubTrigger>Share</MenubarSubTrigger>
-                        <MenubarSubContent>
-                            <MenubarItem>Email link</MenubarItem>
-                            <MenubarItem>Messages</MenubarItem>
-                            <MenubarItem>Notes</MenubarItem>
-                        </MenubarSubContent>
-                    </MenubarSub>
-                    <MenubarSeparator />
-                    <MenubarItem>
-                        Print... <MenubarShortcut>⌘P</MenubarShortcut>
-                    </MenubarItem>
-                </MenubarContent>
-            </MenubarMenu>
-            <MenubarMenu>
-                <MenubarTrigger>Edit</MenubarTrigger>
-                <MenubarContent>
-                    <MenubarItem>
-                        Undo <MenubarShortcut>⌘Z</MenubarShortcut>
-                    </MenubarItem>
-                    <MenubarItem>
-                        Redo <MenubarShortcut>⇧⌘Z</MenubarShortcut>
-                    </MenubarItem>
-                    <MenubarSeparator />
-                    <MenubarSub>
-                        <MenubarSubTrigger>Find</MenubarSubTrigger>
-                        <MenubarSubContent>
-                            <MenubarItem>Search the web</MenubarItem>
-                            <MenubarSeparator />
-                            <MenubarItem>Find...</MenubarItem>
-                            <MenubarItem>Find Next</MenubarItem>
-                            <MenubarItem>Find Previous</MenubarItem>
-                        </MenubarSubContent>
-                    </MenubarSub>
-                    <MenubarSeparator />
-                    <MenubarItem>Cut</MenubarItem>
-                    <MenubarItem>Copy</MenubarItem>
-                    <MenubarItem>Paste</MenubarItem>
-                </MenubarContent>
-            </MenubarMenu>
-            <MenubarMenu>
-                <MenubarTrigger>View</MenubarTrigger>
-                <MenubarContent>
-                    <MenubarSub>
-                        <MenubarSubTrigger>Select theme</MenubarSubTrigger>
-                        <MenubarSubContent>
-                            <MenubarRadioGroup
-                                value={theme}
-                                onValueChange={(value) => setTheme(value as Theme)}
-                            >
-                                <MenubarRadioItem value="dark">Dark</MenubarRadioItem>
-                                <MenubarRadioItem value="light">Light</MenubarRadioItem>
-                                <MenubarRadioItem value="system">System</MenubarRadioItem>
-                            </MenubarRadioGroup>
-                        </MenubarSubContent>
-                    </MenubarSub>
-                    <MenubarSub>
-                        <MenubarSubTrigger>Advanced</MenubarSubTrigger>
-                        <MenubarSubContent>
-                            <MenubarCheckboxItem
-                                checked={devMode}
-                                onClick={() => setDevMode(!devMode)}
-                            >Developer Mode</MenubarCheckboxItem>
-                        </MenubarSubContent>
-                    </MenubarSub>
-                </MenubarContent>
-            </MenubarMenu>
-        </Menubar>
+        <MenubarMenu>
+            <CompactTrigger>View</CompactTrigger>
+            <CompactContent>
+                <MenubarSub>
+                    <CompactSubTrigger>
+                        Theme
+                    </CompactSubTrigger>
+                    <CompactSubContent className={compactMenubarStyles.content}>
+                        <CompactRadioGroup
+                            value={theme}
+                            onChange={(v) => setTheme(v as Theme)}
+                            options={[
+                                { label: "Dark", value: "dark" },
+                                { label: "Light", value: "light" },
+                                { label: "System", value: "system" },
+                            ]}
+                        />
+                    </CompactSubContent>
+                </MenubarSub>
+                <MenubarSub>
+                    <CompactSubTrigger>
+                        Text Size
+                    </CompactSubTrigger>
+                    <CompactSubContent className={compactMenubarStyles.content}>
+                        <CompactRadioGroup
+                            value={textSize}
+                            onChange={(v) => setTextSize(v as TextSize)}
+                            options={[
+                                { label: "Small", value: "small" },
+                                { label: "Medium", value: "medium" },
+                                { label: "Large", value: "large" },
+                            ]}
+                        />
+                    </CompactSubContent>
+                </MenubarSub>
+
+                <CompactSeparator />
+
+                <MenubarSub>
+                    <CompactSubTrigger>
+                        Advanced
+                    </CompactSubTrigger>
+                    <CompactSubContent>
+                        <CompactCheckboxItem
+                            checked={devMode}
+                            onCheckedChange={() => setDevMode(!devMode)}
+                        >
+                            Developer Mode
+                        </CompactCheckboxItem>
+                    </CompactSubContent>
+                </MenubarSub>
+            </CompactContent>
+        </MenubarMenu>
     )
 }

@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import { ValidOS } from '@/types';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type StatusProviderProps = {
     children: React.ReactNode
@@ -10,6 +11,9 @@ type StatusProviderProps = {
 type StatusProviderState = {
     devMode: boolean
     setDevMode: (state: boolean) => void
+
+    os: ValidOS
+    setOs: (os: ValidOS) => void
 }
 
 const StatusProviderContext = createContext<StatusProviderState | undefined>(undefined);
@@ -19,11 +23,30 @@ export function StatusProvider({
     defaultState,
     ...props
 }: StatusProviderProps) {
-    const [devMode, setDevMode] = useState<boolean>(defaultState?.devMode ?? false);
+    const [devMode, setDevMode] = useState<boolean>(
+        defaultState?.devMode ?? false
+    );
+    const [os, setOs] = useState<ValidOS>(null)
+
+    useEffect(() => {
+        const platform = navigator.userAgent.toLowerCase()
+      
+        if (platform.includes("mac")) {
+          setOs("macos")
+        } else if (platform.includes("win")) {
+          setOs("windows")
+        } else if (platform.includes("linux")) {
+          setOs("linux")
+        } else {
+          setOs(null)
+        }
+      }, [])
 
     const value = {
         devMode,
-        setDevMode
+        setDevMode,
+        os,
+        setOs
     }
 
     return (
