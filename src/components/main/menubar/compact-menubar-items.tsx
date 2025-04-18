@@ -35,16 +35,16 @@ export const CompactTrigger = ({
 export const CompactSubTrigger = ({
     children,
     ...props
-  }: React.ComponentProps<typeof MenubarSubTrigger>) => {
+}: React.ComponentProps<typeof MenubarSubTrigger>) => {
     return (
-      <MenubarSubTrigger
-        className={`${compactMenubarStyles.item} ${useFontSize()}`}
-        {...props}
-      >
-        {children}
-      </MenubarSubTrigger>
+        <MenubarSubTrigger
+            className={`${compactMenubarStyles.item} ${useFontSize()}`}
+            {...props}
+        >
+            {children}
+        </MenubarSubTrigger>
     )
-  }
+}
 
 export const CompactItem = ({
     children,
@@ -67,6 +67,7 @@ export const CompactContent = ({
     <MenubarContent
         align="start"
         sideOffset={0}
+        alignOffset={0}
         className={compactMenubarStyles.content}
     >
         {children}
@@ -76,17 +77,17 @@ export const CompactContent = ({
 export const CompactSubContent = ({
     children,
     ...props
-  }: React.ComponentProps<typeof MenubarSubContent>) => {
+}: React.ComponentProps<typeof MenubarSubContent>) => {
     return (
-      <MenubarSubContent
-        sideOffset={0}
-        className={`${compactMenubarStyles.content} w-full`}
-        {...props}
-      >
-        {children}
-      </MenubarSubContent>
+        <MenubarSubContent
+            sideOffset={0}
+            className={`${compactMenubarStyles.content} w-full`}
+            {...props}
+        >
+            {children}
+        </MenubarSubContent>
     )
-  }
+}
 
 export const CompactSeparator = () => (
     <MenubarSeparator className={compactMenubarStyles.separator} />
