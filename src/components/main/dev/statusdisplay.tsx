@@ -1,0 +1,29 @@
+import { useStatus } from "@/components/status-provider";
+
+import AppleIcon from '@/assets/icons/os/apple-icon.svg?react';
+import WindowsIcon from '@/assets/icons/os/windows-icon.svg?react';
+import LinuxIcon from '@/assets/icons/os/linux-icon.svg?react';
+import { useTheme } from "@/components/theme-provider";
+
+const OSIcons: Record<string, React.ElementType> = {
+    macos: AppleIcon,
+    windows: WindowsIcon,
+    linux: LinuxIcon,
+};
+
+const StatusDisplay = () => {
+    const { os } = useStatus();
+    const { theme } = useTheme();
+
+    const Icon = OSIcons[os as string] || AppleIcon;
+
+    const displayColor = theme === 'dark' ? 'text-black' : 'text-white';
+    const opposite = theme === 'dark' ? 'bg-white' : 'bg-black';
+    return (
+        <div className={`${displayColor} ${opposite} inline-flex items-center justify-center p-1 `}>
+            <Icon className="w-3 h-3" />
+        </div>
+    );
+};
+
+export default StatusDisplay;

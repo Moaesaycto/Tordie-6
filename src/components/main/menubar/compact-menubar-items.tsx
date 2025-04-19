@@ -17,7 +17,7 @@ import { useFontSize } from "@/lib/format"
 
 export const compactMenubarStyles = {
     trigger: "m-0 rounded-none px-2 py-1",
-    item: "px-2 py-1 m-0 rounded-none font-mono",
+    item: "px-2 py-1 m-0 rounded-none",
     content: "gap-0 m-0 p-0 rounded-none",
     separator: "m-0",
 }
