@@ -15,6 +15,7 @@ export function HeaderMenubar() {
         <Menubar className="rounded-none w-full p-0 gap-0 h-auto min-h-0" loop>
             <FileMenu />
             <ViewMenu />
+            <HelpHemu />
         </Menubar>
     )
 }
@@ -92,6 +93,20 @@ const ViewMenu = () => {
                         </CompactCheckboxItem>
                     </CompactSubContent>
                 </MenubarSub>
+            </CompactContent>
+        </MenubarMenu>
+    )
+}
+
+const HelpHemu = () => {
+
+    return (
+        <MenubarMenu>
+            <CompactTrigger>Help</CompactTrigger>
+            <CompactContent>
+                <CompactItem disabled>
+                    About Tordie 6
+                </CompactItem>
             </CompactContent>
         </MenubarMenu>
     )

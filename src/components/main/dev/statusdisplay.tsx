@@ -3,6 +3,7 @@ import { useStatus } from "@/components/status-provider";
 import AppleIcon from '@/assets/icons/os/apple-icon.svg?react';
 import WindowsIcon from '@/assets/icons/os/windows-icon.svg?react';
 import LinuxIcon from '@/assets/icons/os/linux-icon.svg?react';
+import OtherIcon from '@/assets/icons/os/other-icon.svg?react';
 import { useTheme } from "@/components/theme-provider";
 
 const OSIcons: Record<string, React.ElementType> = {
@@ -15,7 +16,7 @@ const StatusDisplay = () => {
     const { os } = useStatus();
     const { theme } = useTheme();
 
-    const Icon = OSIcons[os as string] || AppleIcon;
+    const Icon = OSIcons[os as string] || OtherIcon;
 
     const displayColor = theme === 'dark' ? 'text-black' : 'text-white';
     const opposite = theme === 'dark' ? 'bg-white' : 'bg-black';

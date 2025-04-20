@@ -8,7 +8,6 @@ const DevFooter = () => {
             <Separator />
             <div className="flex flex-row w-full justify-between">
                 <KeyDisplay />
-
                 <StatusDisplay />
             </div>
         </div>

@@ -13,8 +13,8 @@
     "windows": [
       {
         "title": "Tordie 6 | Version 6.1.0.0",
-        "width": 800,
-        "height": 600,
+        "width": 1200,
+        "height": 800,
         "resizable": true,
         "fullscreen": false
       }

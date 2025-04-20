@@ -79,10 +79,11 @@ export default function PressedKeys() {
 
   return (
     <div
-      className="inline-block w-[20ch] whitespace-nowrap overflow-hidden text-ellipsis select-none font-mono"
+      className="inline-block w-[20ch] whitespace-nowrap overflow-hidden text-ellipsis select-none font-mono text-xs h-full flex items-center"
       aria-label="currently pressed keys"
     >
       {display}
     </div>
   );
+  
 }

@@ -3,12 +3,18 @@
 
 @custom-variant dark (&:is(.dark *));
 
+* {
+  user-select: none;
+}
+
 body {
   margin: 0;
   padding: 0;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
 }
 
@@ -123,6 +129,7 @@ html, body, #root {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }

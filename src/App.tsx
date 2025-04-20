@@ -3,8 +3,9 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import Header from "./components/main/header";
-import Footer from "./components/main/footer";
+import Header from "@/components/main/header";
+import Footer from "@/components/main/footer";
+import Canvas from "@/components/canvas/canvas";
 
 function App() {
   return (
@@ -17,11 +18,7 @@ function App() {
         >
           {/* Left Panel: Canvas Area */}
           <ResizablePanel defaultSize={70} minSize={30}>
-            <div className="h-full w-full p-4 border-r border-border">
-              <div className="canvas-frame bg-muted text-muted-foreground border border-border rounded h-full">
-                [ Canvas Area ]
-              </div>
-            </div>
+            <Canvas />
           </ResizablePanel>
 
           <ResizableHandle />
