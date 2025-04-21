@@ -11,11 +11,17 @@ type StatusProviderProps = {
 
 type CanvasStateProps = {
     documentWidth: number,
+    setDocumentWidth: (width: number) => void,
     documentHeight: number,
+    setDocumentHeight: (height: number) => void,
     offsetX: number,
+    setOffsetX: (offset: number) => void,
     offsetY: number,
+    setOffsetY: (offset: number) => void,
     rotation: number,
+    setRotation: (rotation: number) => void,
     zoom: number,
+    setZoom: (zoom: number) => void,
 }
 
 type StatusProviderState = {
@@ -53,14 +59,27 @@ export function StatusProvider({
         }
     }, [])
 
+    const [documentWidth, setDocumentWidth] = useState<number>(Config.canvas.defaultWidth);
+    const [documentHeight, setDocumentHeight] = useState<number>(Config.canvas.defaultHeight);
+    const [offsetX, setOffsetX] = useState<number>(Config.canvas.defaultOffsetX);
+    const [offsetY, setOffsetY] = useState<number>(Config.canvas.defaultOffsetY);
+    const [zoom, setZoom] = useState<number>(Config.canvas.defaultZoom);
+    const [rotation, setRotation] = useState<number>(Config.canvas.defaultRotation);
+
     const defaultCanvas = {
-        documentWidth: Config.canvas.defaultWidth,
-        documentHeight: Config.canvas.defaultHeight,
-        offsetX: Config.canvas.defaultOffsetX,
-        offsetY: Config.canvas.defaultOffsetY,
-        zoom: Config.canvas.defaultZoom,
-        rotation: Config.canvas.defaultRotation,
-    }
+        documentWidth,
+        setDocumentWidth,
+        documentHeight,
+        setDocumentHeight,
+        offsetX,
+        setOffsetX,
+        offsetY,
+        setOffsetY,
+        zoom,
+        setZoom,
+        rotation,
+        setRotation,
+    };
 
     const value = {
         devMode,

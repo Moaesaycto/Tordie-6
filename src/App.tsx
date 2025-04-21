@@ -6,47 +6,64 @@ import {
 import Header from "@/components/main/header";
 import Footer from "@/components/main/footer";
 import Canvas from "@/components/canvas/canvas";
+import { Controller } from "./components/controller/controller";
+import { useEffect, useState } from "react";
 
 function App() {
+  const [controllerHeight, setControllerHeight] = useState<number>(0)
+
+  useEffect(() => {
+    const updateHeight = () => {
+      const headerElement = document.querySelector("header");
+      const footerElement = document.querySelector("footer");
+      const headerHeight = headerElement ? headerElement.clientHeight : 0;
+      const footerHeight = footerElement ? footerElement.clientHeight : 0;
+      setControllerHeight(window.innerHeight - headerHeight - footerHeight);
+    };
+
+    // Initial run
+    updateHeight();
+
+    // Window resize
+    window.addEventListener("resize", updateHeight);
+
+    // ResizeObserver for header/footer
+    const header = document.querySelector("header");
+    const footer = document.querySelector("footer");
+    const observer = new ResizeObserver(updateHeight);
+    if (header) observer.observe(header);
+    if (footer) observer.observe(footer);
+
+    return () => {
+      window.removeEventListener("resize", updateHeight);
+      observer.disconnect();
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col min-h-screen w-screen bg-background text-foreground font-mono">
+    <div className="flex flex-col min-h-screen font-mono">
       <Header />
-      <main className="flex-1 flex flex-col">
-        <ResizablePanelGroup
-          direction="horizontal"
-          className="flex-1 h-0"
-        >
-          {/* Left Panel: Canvas Area */}
+
+      <main className="flex-1 flex flex-col h-0">
+        <ResizablePanelGroup direction="horizontal" className="flex-1 h-0">
           <ResizablePanel defaultSize={70} minSize={30}>
             <Canvas />
           </ResizablePanel>
 
           <ResizableHandle />
 
-          {/* Right Panel: Controls */}
-          <ResizablePanel defaultSize={30} minSize={20}>
-            <div className="h-full p-4 bg-card text-card-foreground space-y-4">
-              <h2 className="text-lg font-semibold">Controls</h2>
-
-              <div className="space-y-2">
-                <label htmlFor="input" className="block text-sm font-medium">
-                  Input
-                </label>
-                <input
-                  id="input"
-                  type="number"
-                  placeholder="e.g. 3.14"
-                  className="w-full px-2 py-1 rounded border border-input bg-background text-foreground"
-                />
-              </div>
-
-              <button className="w-full px-2 py-1 rounded bg-primary text-primary-foreground hover:opacity-90 transition">
-                Apply
-              </button>
-            </div>
+          <ResizablePanel
+            defaultSize={30}
+            minSize={20}
+            id="controller-home"
+            className="flex flex-col"
+            style={{ height: controllerHeight }}
+          >
+            <Controller />
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
+
       <Footer />
     </div>
   );

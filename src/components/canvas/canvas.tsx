@@ -5,7 +5,7 @@ const RULER_SIZE = 20;
 
 const Canvas = () => {
     return (
-        <div className="h-full w-full">
+        <div className="h-full w-full" id="main-canvas">
             <div className="bg-muted h-full flex items-center justify-center">
                 <div
                     className="grid h-full w-full"
