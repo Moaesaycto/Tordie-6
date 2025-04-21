@@ -4,8 +4,12 @@ const CanvasRenderer = () => {
     const { documentWidth, documentHeight, offsetX, offsetY, zoom, rotation } = useStatus().canvas;
 
     return (
-        <div className="relative w-full h-full overflow-hidden bg-neutral-700">
+        <div
+            id="canvasViewport"
+            className="relative w-full h-full overflow-hidden bg-neutral-700"
+        >
             <div
+                id="canvasPage"
                 className="absolute bg-white"
                 style={{
                     width: `${documentWidth}px`,

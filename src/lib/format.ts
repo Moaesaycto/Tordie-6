@@ -13,8 +13,14 @@ const modifierSymbols: Record<string, string> = {
 const sizeStyles: Record<string, string> = {
     small: "text-xs",
     medium: "text-sm",
-    large: "text-md",
+    large: "text-lg",
 }
+
+const inputHeights: Record<string, string> = {
+    small: "h-6",
+    medium: "h-7",
+    large: "h-8",
+};
 
 export function useKeyHint() {
     const { os } = useStatus()
@@ -31,3 +37,13 @@ export function useFontSize() {
     const { textSize } = useTheme()
     return sizeStyles[textSize];
 }
+
+export function useInputHeight() {
+    const { textSize } = useTheme()
+    return inputHeights[textSize];
+}
+
+export const formatLabel = (num: number) => {
+    const str = Number(num).toPrecision(3);
+    return Number(str).toString();
+};
