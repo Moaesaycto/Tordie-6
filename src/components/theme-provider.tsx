@@ -10,6 +10,7 @@ type ThemeProviderProps = {
 
 type ThemeProviderState = {
     theme: Theme
+    resolvedTheme: "light" | "dark"
     setTheme: (theme: Theme) => void
     textSize: TextSize
     setTextSize: (size: TextSize) => void
@@ -17,6 +18,7 @@ type ThemeProviderState = {
 
 const initialState: ThemeProviderState = {
     theme: "system",
+    resolvedTheme: "light",
     setTheme: () => null,
     textSize: "medium",
     setTextSize: () => null,
@@ -27,65 +29,65 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
 export function ThemeProvider({
     children,
     defaultTheme = "system",
+    defaultTextSize = "medium",
     storageKey = "vite-ui-theme",
-    ...props
 }: ThemeProviderProps) {
-    const [theme, setTheme] = useState<Theme>(
+    const [theme, setThemeState] = useState<Theme>(
         () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
     )
 
-    useEffect(() => {
-        const root = window.document.documentElement
-
-        root.classList.remove("light", "dark")
-
+    const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() => {
         if (theme === "system") {
-            const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-                .matches
+            return window.matchMedia("(prefers-color-scheme: dark)").matches
                 ? "dark"
                 : "light"
-
-            root.classList.add(systemTheme)
-            return
         }
+        return theme
+    })
 
-        root.classList.add(theme)
-    }, [theme])
-
-
-    const [textSize, setTextSize] = useState<TextSize>(
-        () => (localStorage.getItem(`${storageKey}-textSize`) as TextSize) || "medium"
+    const [textSize, setTextSizeState] = useState<TextSize>(
+        () => (localStorage.getItem(`${storageKey}-textSize`) as TextSize) || defaultTextSize
     )
 
     useEffect(() => {
         const root = document.documentElement
 
+        const appliedTheme =
+            theme === "system"
+                ? window.matchMedia("(prefers-color-scheme: dark)").matches
+                    ? "dark"
+                    : "light"
+                : theme
+
+        setResolvedTheme(appliedTheme)
+
         root.classList.remove("light", "dark")
-        root.classList.add(theme === "system"
-            ? window.matchMedia("(prefers-color-scheme: dark)").matches
-                ? "dark"
-                : "light"
-            : theme)
+        root.classList.add(appliedTheme)
 
         root.classList.remove("text-small", "text-medium", "text-large")
         root.classList.add(`text-${textSize}`)
     }, [theme, textSize])
 
+    const setTheme = (newTheme: Theme) => {
+        localStorage.setItem(storageKey, newTheme)
+        setThemeState(newTheme)
+    }
+
+    const setTextSize = (size: TextSize) => {
+        localStorage.setItem(`${storageKey}-textSize`, size)
+        setTextSizeState(size)
+    }
+
     const value: ThemeProviderState = {
         theme,
-        setTheme: (theme: Theme) => {
-            localStorage.setItem(storageKey, theme)
-            setTheme(theme)
-        },
+        resolvedTheme,
+        setTheme,
         textSize,
-        setTextSize: (size: TextSize) => {
-            localStorage.setItem(`${storageKey}-textSize`, size)
-            setTextSize(size)
-        },
+        setTextSize,
     }
 
     return (
-        <ThemeProviderContext.Provider {...props} value={value}>
+        <ThemeProviderContext.Provider value={value}>
             {children}
         </ThemeProviderContext.Provider>
     )

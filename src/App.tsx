@@ -7,52 +7,53 @@ import Header from "@/components/main/header";
 import Footer from "@/components/main/footer";
 import Canvas from "@/components/canvas/canvas";
 import { Controller } from "./components/controller/controller";
-import { useEffect, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
 function App() {
-  const [controllerHeight, setControllerHeight] = useState<number>(0)
+  const [controllerHeight, setControllerHeight] = useState<number>(0);
 
-  useEffect(() => {
-    const updateHeight = () => {
-      const headerElement = document.querySelector("header");
-      const footerElement = document.querySelector("footer");
-      const headerHeight = headerElement ? headerElement.clientHeight : 0;
-      const footerHeight = footerElement ? footerElement.clientHeight : 0;
-      setControllerHeight(window.innerHeight - headerHeight - footerHeight);
-    };
+  const headerEl = useRef<HTMLElement | null>(null);
+  const footerEl = useRef<HTMLElement | null>(null);
 
-    updateHeight();
+  const recalc = useCallback(() => {
+    if (!headerEl.current) headerEl.current = document.querySelector("header");
+    if (!footerEl.current) footerEl.current = document.querySelector("footer");
 
-    window.addEventListener("resize", updateHeight);
+    const headerH = headerEl.current?.getBoundingClientRect().height ?? 0;
+    const footerH = footerEl.current?.getBoundingClientRect().height ?? 0;
 
-    const header = document.querySelector("header");
-    const footer = document.querySelector("footer");
-    const observer = new ResizeObserver(updateHeight);
-    if (header) observer.observe(header);
-    if (footer) observer.observe(footer);
-
-    return () => {
-      window.removeEventListener("resize", updateHeight);
-      observer.disconnect();
-    };
+    setControllerHeight(Math.max(window.innerHeight - headerH - footerH, 0));
   }, []);
 
+  useLayoutEffect(() => {
+    recalc();
+
+    window.addEventListener("resize", recalc);
+
+    const ro = new ResizeObserver(recalc);
+    headerEl.current && ro.observe(headerEl.current);
+    footerEl.current && ro.observe(footerEl.current);
+
+    return () => {
+      window.removeEventListener("resize", recalc);
+      ro.disconnect();
+    };
+  }, [recalc]);
+
   return (
-    <div className="flex flex-col min-h-screen font-mono">
+    <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono" >
       <Header />
 
-      <main className="flex-1 flex flex-col h-0">
-        <ResizablePanelGroup direction="horizontal" className="flex-1 h-0">
+      <main className="flex h-full flex-col overflow-hidden">
+        <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
           <ResizablePanel defaultSize={70} minSize={30}>
             <Canvas />
           </ResizablePanel>
-
           <ResizableHandle />
-
           <ResizablePanel
+            id="controller-home"
             defaultSize={30}
             minSize={20}
-            id="controller-home"
             className="flex flex-col"
             style={{ height: controllerHeight }}
           >
@@ -60,9 +61,8 @@ function App() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
-
       <Footer />
-    </div>
+    </div >
   );
 }
 

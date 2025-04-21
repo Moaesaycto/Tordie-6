@@ -1,10 +1,15 @@
 {
     "canvas": {
-        "defaultWidth": 600,
-        "defaultHeight": 600,
-        "defaultOffsetX": 200,
-        "defaultOffsetY": 200,
+        "defaultWidth": 400,
+        "defaultHeight": 500,
+        "defaultOffsetX": 300,
+        "defaultOffsetY": 0,
         "defaultRotation": 0,
-        "defaultZoom": 1
+        "defaultZoom": 1.2
+    },
+    "ruler": {
+        "majorLength": 10,
+        "minorLength": 8,
+        "subLength": 3
     }
 }

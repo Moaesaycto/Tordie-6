@@ -15,11 +15,9 @@ const Canvas = () => {
                     }}
                 >
                     <div className="bg-neutral-500 border-3 border-neutral-600" />
-                    <Ruler start={0} end={1} orientation="horizontal" />
+                    <Ruler orientation="horizontal" />
 
                     <Ruler
-                        start={0}
-                        end={1}
                         orientation="vertical"
                     />
                     <CanvasRenderer />

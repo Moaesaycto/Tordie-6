@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import DocumentController from "./documentcontroller"
+import DocumentController from "@/components/controller/documentcontroller"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { useRef, useEffect, useState } from "react"
 

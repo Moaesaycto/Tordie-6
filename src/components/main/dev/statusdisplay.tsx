@@ -14,12 +14,12 @@ const OSIcons: Record<string, React.ElementType> = {
 
 const StatusDisplay = () => {
     const { os } = useStatus();
-    const { theme } = useTheme();
+    const { resolvedTheme } = useTheme();
 
     const Icon = OSIcons[os as string] || OtherIcon;
 
-    const displayColor = theme === 'dark' ? 'text-black' : 'text-white';
-    const opposite = theme === 'dark' ? 'bg-white' : 'bg-black';
+    const displayColor = resolvedTheme === 'dark' ? 'text-black' : 'text-white';
+    const opposite = resolvedTheme === 'dark' ? 'bg-white' : 'bg-black';
     return (
         <div className={`${displayColor} ${opposite} inline-flex items-center justify-center p-1 `}>
             <Icon className="w-3 h-3" />
