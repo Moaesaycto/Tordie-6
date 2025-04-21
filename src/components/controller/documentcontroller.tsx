@@ -1,25 +1,34 @@
 import { useState } from "react";
 import { useStatus } from "@/components/status-provider";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { useFontSize, useInputHeight } from "@/lib/format";
+import { useFontSize } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
 
 const DocumentController = () => {
-    const { documentWidth, setDocumentWidth, documentHeight, setDocumentHeight } = useStatus().canvas;
+    const {
+        documentWidth,
+        setDocumentWidth,
+        documentHeight,
+        setDocumentHeight,
+        offsetX,
+        setOffsetX,
+        offsetY,
+        setOffsetY,
+        rotation,
+        setRotation,
+        zoom,
+        setZoom
+    } = useStatus().canvas;
     const fontSize = useFontSize();
-    const heightClass = useInputHeight();
+    const heightClass = "h-5";
 
     const documentAttributes = [
-        { key: "width", label: "Width", value: documentWidth, setter: setDocumentWidth },
-        { key: "height", label: "Height", value: documentHeight, setter: setDocumentHeight }
+        { key: "width", label: "Width", value: documentWidth, setter: setDocumentWidth, unit: "px" },
+        { key: "height", label: "Height", value: documentHeight, setter: setDocumentHeight, unit: "px" },
+        { key: "xoffset", label: "X-Offset", value: offsetX, setter: setOffsetX, unit: "px" },
+        { key: "yoffset", label: "Y-Offset", value: offsetY, setter: setOffsetY, unit: "px" },
+        { key: "rotation", label: "Rotation", value: rotation, setter: setRotation, unit: "px" },
+        { key: "zoom", label: "Zoom", value: zoom, setter: setZoom, unit: null },
     ];
 
     const [inputs, setInputs] = useState(() =>
@@ -35,36 +44,24 @@ const DocumentController = () => {
         if (!isNaN(parsed)) setter(parsed);
     };
 
-    const cellClass = `py-0 px-0 pl-2 ${fontSize}`;
-    const inputClass = "py-0 px-2 rounded-none h-6";
-
     return (
-        <div className={fontSize}>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead className={`w-[70%] ${cellClass} font-bold`}>Document Attribute</TableHead>
-                        <TableHead className={`text-right ${cellClass} font-bold`}>Value</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {documentAttributes.map(({ key, label, setter }) => (
-                        <TableRow key={key}>
-                            <TableCell className={cellClass}>{label}</TableCell>
-                            <TableCell className={`text-right ${cellClass}`}>
-                                <Input
-                                    className={`${inputClass} ${fontSize} ${heightClass}`}
-                                    type="number"
-                                    value={inputs[key]}
-                                    onChange={(e) => handleChange(key, e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && handleSubmit(key, setter)}
-                                    onBlur={() => handleSubmit(key, setter)}
-                                />
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+        <div className={`w-full space-y-1 ${fontSize}`}>
+            {documentAttributes.map(({ key, label, setter, unit }) => (
+                <div key={key} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-0.5 sm:gap-2">
+                    <label className="font-medium w-full sm:w-[40%] leading-tight">{label}</label>
+                    <div className="flex items-center w-full sm:w-[60%] gap-1">
+                        <Input
+                            className={`w-full ${heightClass} ${fontSize} py-0 px-1 rounded-sm`}
+                            type="number"
+                            value={inputs[key]}
+                            onChange={(e) => handleChange(key, e.target.value)}
+                            onKeyDown={(e) => e.key === "Enter" && handleSubmit(key, setter)}
+                            onBlur={() => handleSubmit(key, setter)}
+                        />
+                        {unit && <span className="text-muted-foreground text-xs">{unit}</span>}
+                    </div>
+                </div>
+            ))}
             <Separator />
         </div>
     );
