@@ -21,13 +21,10 @@ function App() {
       setControllerHeight(window.innerHeight - headerHeight - footerHeight);
     };
 
-    // Initial run
     updateHeight();
 
-    // Window resize
     window.addEventListener("resize", updateHeight);
 
-    // ResizeObserver for header/footer
     const header = document.querySelector("header");
     const footer = document.querySelector("footer");
     const observer = new ResizeObserver(updateHeight);
