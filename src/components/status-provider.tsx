@@ -1,5 +1,6 @@
 import { ValidOS } from '@/types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import Config from "@/tordie.config.json";
 
 type StatusProviderProps = {
     children: React.ReactNode
@@ -8,12 +9,22 @@ type StatusProviderProps = {
     }
 }
 
+type CanvasStateProps = {
+    documentWidth: number,
+    documentHeight: number,
+    offsetX: number,
+    offsetY: number,
+    rotation: number,
+    zoom: number,
+}
+
 type StatusProviderState = {
     devMode: boolean
     setDevMode: (state: boolean) => void
 
     os: ValidOS
     setOs: (os: ValidOS) => void
+    canvas: CanvasStateProps
 }
 
 const StatusProviderContext = createContext<StatusProviderState | undefined>(undefined);
@@ -30,23 +41,33 @@ export function StatusProvider({
 
     useEffect(() => {
         const platform = navigator.userAgent.toLowerCase()
-      
+
         if (platform.includes("mac")) {
-          setOs("macos")
+            setOs("macos")
         } else if (platform.includes("win")) {
-          setOs("windows")
+            setOs("windows")
         } else if (platform.includes("linux")) {
-          setOs("linux")
+            setOs("linux")
         } else {
-          setOs(null)
+            setOs(null)
         }
-      }, [])
+    }, [])
+
+    const defaultCanvas = {
+        documentWidth: Config.canvas.defaultWidth,
+        documentHeight: Config.canvas.defaultHeight,
+        offsetX: Config.canvas.defaultOffsetX,
+        offsetY: Config.canvas.defaultOffsetY,
+        zoom: Config.canvas.defaultZoom,
+        rotation: Config.canvas.defaultRotation,
+    }
 
     const value = {
         devMode,
         setDevMode,
         os,
-        setOs
+        setOs,
+        canvas: defaultCanvas,
     }
 
     return (
