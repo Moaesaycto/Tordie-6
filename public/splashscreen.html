@@ -1,14 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Loading...</title>
   <style>
-    html, body {
+    * {
+      user-select: none;
+    }
+
+    html,
+    body {
       margin: 0;
+      padding: 0;
       height: 100%;
-      background: #111;
+      width: 100%;
+      background: url("./splashscreen.svg") no-repeat center center;
+      background-size: cover;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -17,29 +26,42 @@
     }
 
     .spinner {
-      width: 60px;
-      height: 60px;
-      border: 6px solid #333;
-      border-top: 6px solid #00bcd4;
+      width: 30px;
+      height: 30px;
+      border: 6px solid #c2c2c2;
+      border-top: 6px solid #736DCD;
       border-radius: 50%;
       animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .main {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-end;
+      gap: 15px;
     }
 
     .text {
-      margin-top: 1rem;
-      font-size: 1.2rem;
-      color: #aaa;
+      font-size: 12px;
+      color: #000000;
+      line-height: 1;
     }
   </style>
 </head>
+
 <body>
-  <div style="text-align: center;">
+  <div class="main" style="position: absolute; bottom: 12px; right: 12px;">
+    <div class="text"> Tordie V6 &copy; Moaesaycto
+      <script>document.write(new Date().getFullYear());</script>
+    </div>
     <div class="spinner"></div>
-    <div class="text">Launching Tordie...</div>
   </div>
 </body>
+
 </html>
