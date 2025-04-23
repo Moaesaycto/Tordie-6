@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading...</title>
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: sans-serif;
+      color: #fff;
+    }
+
+    .spinner {
+      width: 60px;
+      height: 60px;
+      border: 6px solid #333;
+      border-top: 6px solid #00bcd4;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .text {
+      margin-top: 1rem;
+      font-size: 1.2rem;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <div style="text-align: center;">
+    <div class="spinner"></div>
+    <div class="text">Launching Tordie...</div>
+  </div>
+</body>
+</html>

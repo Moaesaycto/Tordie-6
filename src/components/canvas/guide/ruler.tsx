@@ -37,7 +37,7 @@ const Ruler = ({
 
     const colors = colorScheme[resolvedTheme as keyof typeof colorScheme];
 
-    void rotation; // Currently no scaling is applied from the rotation
+    void rotation; // TODO: Currently no scaling is applied from the rotation
 
     const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
 
