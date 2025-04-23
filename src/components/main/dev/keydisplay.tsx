@@ -32,14 +32,14 @@ export default function PressedKeys() {
 
   const mapKey = (code: string): string => {
     const modMap: Record<string, string> = {
-      ControlLeft: "CTRL",
-      ControlRight: "CTRL",
-      ShiftLeft: "SHIFT",
-      ShiftRight: "SHIFT",
-      AltLeft: "ALT",
-      AltRight: "ALT",
-      MetaLeft: "META",
-      MetaRight: "META",
+      ControlLeft: "Ctrl",
+      ControlRight: "Ctrl",
+      ShiftLeft: "Shift",
+      ShiftRight: "Shift",
+      AltLeft: "Alt",
+      AltRight: "Alt",
+      MetaLeft: "Meta",
+      MetaRight: "Meta",
     };
 
     const symbolMap: Record<string, string> = {
@@ -54,7 +54,7 @@ export default function PressedKeys() {
       Comma: ",",
       Period: ".",
       Slash: "/",
-      Space: "SPACE",
+      Space: "Space",
     };
 
     if (code in modMap) return modMap[code];
@@ -65,25 +65,24 @@ export default function PressedKeys() {
   };
 
   const weight: Record<string, number> = {
-    CTRL: 1,
-    SHIFT: 2,
-    ALT: 3,
-    META: 4,
+    Ctrl: 1,
+    Shift: 2,
+    Alt: 3,
+    Meta: 4,
   };
 
   const labels = pressed.map(mapKey);
   const modifiers = labels.filter(l => l in weight).sort((a, b) => weight[a] - weight[b]);
   const others = labels.filter(l => !(l in weight));
-
-  const display = [...modifiers, ...others].slice(0, 4).join("+");
+  const display = [...modifiers, ...others].slice(0, 4).join(" + ");
 
   return (
     <div
-      className="inline-block w-[20ch] whitespace-nowrap overflow-hidden text-ellipsis select-none font-mono text-xs h-full flex items-center"
-      aria-label="currently pressed keys"
+      className="flex flex-col h-full px-2 text-[0.625rem] font-medium font-mono select-none w-[24ch] overflow-hidden whitespace-nowrap"
+      aria-label="Currently pressed keys"
     >
-      {display}
+      <p>Pressed Key:</p>
+      {display || <span className="text-muted-foreground">None</span>}
     </div>
   );
-  
 }

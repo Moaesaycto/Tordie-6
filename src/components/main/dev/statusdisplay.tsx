@@ -20,11 +20,21 @@ const StatusDisplay = () => {
 
     const displayColor = resolvedTheme === 'dark' ? 'text-black' : 'text-white';
     const opposite = resolvedTheme === 'dark' ? 'bg-white' : 'bg-black';
+
     return (
-        <div className={`${displayColor} ${opposite} inline-flex items-center justify-center p-1 `}>
-            <Icon className="w-3 h-3" />
+        <div
+            className={`
+                ${displayColor} ${opposite}
+                flex flex-col items-center justify-center
+                h-full w-full
+                px-1 py-1
+            `}
+        >
+            <Icon className="w-3 h-auto" />
+            <span className="text-[0.625rem]">{os ? os.toUpperCase() : 'UNKNOWN'}</span>
         </div>
     );
 };
+
 
 export default StatusDisplay;

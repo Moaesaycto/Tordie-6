@@ -7,15 +7,21 @@ const DevFooter = () => {
     return (
         <div className="w-full">
             <Separator />
-            <div className="flex flex-row w-full justify-between">
-                <KeyDisplay />
-                <div className="flex flex-row">
+            <div className="flex flex-row w-full justify-between items-center">
+                <div className="flex flex-row items-center">
+                    <KeyDisplay />
+                </div>
+                <div className="flex flex-row items-center text-xs">
+                    TORDIE © Moae {new Date().getFullYear()}
+                </div>
+                <div className="flex flex-row items-center justify-between ">
                     <CoordsDisplay />
                     <StatusDisplay />
                 </div>
             </div>
         </div>
-    )
-}
+    );
+};
+
 
 export default DevFooter;

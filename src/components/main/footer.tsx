@@ -8,7 +8,6 @@ const Footer = () => {
         <footer className="w-full">
             <Separator />
             <div>
-                TORDIE © Moae {new Date().getFullYear()}
                 {devMode && (<DevFooter />)}
             </div>
         </footer>
