@@ -125,6 +125,34 @@ body,
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.scrollbar-dark {
+  --thumb: #737373;
+  --track: #262626;
+}
+
+.scrollbar-light {
+  --thumb: #a3a3a3;
+  --track: #f5f5f5;
+}
+
+.scrollbar-thin {
+  scrollbar-color: var(--thumb) var(--track);
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: var(--track);
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--thumb);
+  border-radius: 2px;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

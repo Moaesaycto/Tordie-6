@@ -3,122 +3,102 @@ import { useRef, useEffect } from "react";
 import Config from "@/tordie.config.json";
 import { useStatus } from "@/components/status-provider";
 
-type OffsetScaleProps = {
-    orientation?: "horizontal" | "vertical",
-}
-
-const OffsetScale = ({ orientation = "vertical" }: OffsetScaleProps) => {
+const OffsetScale = ({ orientation = "vertical" }: { orientation?: "horizontal" | "vertical" }) => {
     const { resolvedTheme } = useTheme();
-    const isVertical = orientation === "vertical";
-    const scrollRef = useRef<HTMLDivElement>(null);
-
     const { paddingX, paddingY, defaultOffsetX, defaultOffsetY } = Config.canvas;
-    const { documentHeight, documentWidth, setOffsetX, setOffsetY, rotation, zoom } = useStatus().canvas;
+    const {
+        documentHeight, documentWidth,
+        setOffsetX, setOffsetY,
+    } = useStatus().canvas;
 
-    // TODO: Incorporate rotation and zoom into bounds
-    void rotation, zoom;
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const viewportRef = useRef<HTMLElement | null>(null);
+    const vpSize = useRef({ width: 0, height: 0 });
+    const ticking = useRef(false);
+    const isVertical = orientation === "vertical";
 
+    // set initial scroll position
+    useEffect(() => {
+        const el = scrollRef.current;
+        if (!el) return;
+        const minO = isVertical ? paddingY : paddingX;
+        const maxO = isVertical
+            ? vpSize.current.height - paddingY - documentHeight
+            : vpSize.current.width - paddingX - documentWidth;
+
+        const def = isVertical ? defaultOffsetY : defaultOffsetX;
+        const lambda = Math.min(Math.max((def - minO) / (maxO - minO || 1), 0), 1);
+        const maxScroll = isVertical
+            ? el.scrollHeight - el.clientHeight
+            : el.scrollWidth - el.clientWidth;
+        const scrollVal = lambda * maxScroll;
+
+        if (isVertical) el.scrollTop = scrollVal;
+        else el.scrollLeft = scrollVal;
+    }, [paddingX, paddingY, documentHeight, documentWidth, defaultOffsetX, defaultOffsetY, isVertical]);
+
+    // observe viewport size once
+    useEffect(() => {
+        viewportRef.current = document.getElementById("canvasViewport");
+        if (!viewportRef.current) return;
+        const ro = new ResizeObserver(entries => {
+            for (let { contentRect } of entries) {
+                vpSize.current = {
+                    width: contentRect.width,
+                    height: contentRect.height
+                };
+            }
+        });
+        ro.observe(viewportRef.current);
+        return () => ro.disconnect();
+    }, []);
+
+    // scroll handler
     useEffect(() => {
         const el = scrollRef.current;
         if (!el) return;
 
-        // Set scrollbar theme colours
-        const thumb = resolvedTheme === "dark" ? "#737373" : "#a3a3a3";
-        const track = resolvedTheme === "dark" ? "#262626" : "#f5f5f5";
-        el.style.setProperty("--thumb-colour", thumb);
-        el.style.setProperty("--track-colour", track);
+        const onScroll = () => {
+            if (ticking.current) return;
+            ticking.current = true;
+            requestAnimationFrame(() => {
+                const scrollValue = isVertical ? el.scrollTop : el.scrollLeft;
+                const maxScroll = isVertical
+                    ? el.scrollHeight - el.clientHeight
+                    : el.scrollWidth - el.clientWidth;
 
-        const viewport = document.getElementById("canvasViewport")?.getBoundingClientRect();
-        const viewportHeight = viewport?.height ?? 0;
-        const viewportWidth = viewport?.width ?? 0;
+                const minO = isVertical ? paddingY : paddingX;
+                const maxO = isVertical
+                    ? vpSize.current.height - paddingY - documentHeight
+                    : vpSize.current.width - paddingX - documentWidth;
 
-        const minOffset = isVertical ? paddingY : paddingX;
-        const maxOffset = isVertical
-            ? viewportHeight - paddingY - documentHeight
-            : viewportWidth - paddingX - documentWidth;
+                const lambda = scrollValue / (maxScroll || 1);
+                const offset = (1 - lambda) * minO + lambda * maxO;
+                isVertical ? setOffsetY(offset) : setOffsetX(offset);
 
-        // Live scroll offset handler
-        const handleScroll = () => {
-            const scrollValue = isVertical ? el.scrollTop : el.scrollLeft;
-            const maxScroll = isVertical
-                ? el.scrollHeight - el.clientHeight
-                : el.scrollWidth - el.clientWidth;
-
-            const lambda = scrollValue / maxScroll;
-            const settingOffset = (1 - lambda) * minOffset + lambda * maxOffset;
-
-            if (isVertical) {
-                setOffsetY(settingOffset);
-            } else {
-                setOffsetX(settingOffset);
-            }
+                ticking.current = false;
+            });
         };
 
-        el.addEventListener("scroll", handleScroll);
-
-        requestAnimationFrame(() => {
-            const maxScroll = isVertical
-                ? el.scrollHeight - el.clientHeight
-                : el.scrollWidth - el.clientWidth;
-
-            const defaultOffset = isVertical ? defaultOffsetY : defaultOffsetX;
-
-            const denom = maxOffset - minOffset || 1;
-            const lambda = (defaultOffset - minOffset) / denom;
-            const clampedLambda = Math.min(Math.max(lambda, 0), 1);
-            const scrollValue = clampedLambda * maxScroll;
-
-            if (isVertical) {
-                el.scrollTop = scrollValue;
-            } else {
-                el.scrollLeft = scrollValue;
-            }
-        });
-
-        return () => {
-            el.removeEventListener("scroll", handleScroll);
-        };
-    }, [
-        resolvedTheme,
-        isVertical,
-        paddingX,
-        paddingY,
-        documentHeight,
-        documentWidth,
-        defaultOffsetX,
-        defaultOffsetY,
-    ]);
+        el.addEventListener("scroll", onScroll);
+        return () => el.removeEventListener("scroll", onScroll);
+    }, [isVertical, paddingX, paddingY, documentHeight, documentWidth, setOffsetX, setOffsetY]);
 
     return (
         <div
+            id="offsetScale"
             ref={scrollRef}
             className={`
         ${isVertical ? "overflow-y-scroll h-full w-4" : "overflow-x-scroll w-full h-4"}
         scrollbar-thin
+        ${resolvedTheme === "dark" ? "scrollbar-dark" : "scrollbar-light"}
       `}
-            style={{
-                scrollbarColor: "var(--thumb-colour) var(--track-colour)",
-                WebkitOverflowScrolling: "touch",
-            }}
+            style={{ WebkitOverflowScrolling: "touch" }}
         >
-            <div
-                style={{
-                    height: isVertical ? "2000px" : "100%",
-                    width: isVertical ? "100%" : "2000px",
-                }}
-            />
-            <style>{`
-                div::-webkit-scrollbar {
-                    ${isVertical ? "width" : "height"}: 4px;
-                }
-                div::-webkit-scrollbar-track {
-                    background: var(--track-colour);
-                }
-                div::-webkit-scrollbar-thumb {
-                    background: var(--thumb-colour);
-                    border-radius: 2px;
-                }
-            `}</style>
+            <div style={{
+                height: isVertical ? "2000px" : "100%",
+                width: isVertical ? "100%" : "2000px",
+            }} />
         </div>
     );
 };
