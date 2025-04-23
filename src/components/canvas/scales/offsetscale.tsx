@@ -24,13 +24,15 @@ const OffsetScale = ({ orientation = "vertical" }: OffsetScaleProps) => {
         el.style.setProperty("--thumb-colour", thumb);
         el.style.setProperty("--track-colour", track);
 
-        const viewport = document.getElementById("canvasPage")?.getBoundingClientRect();
+        const viewport = document.getElementById("canvasViewport")?.getBoundingClientRect();
         const viewportHeight = viewport?.height;
         const viewportWidth = viewport?.width;
+
+        console.log(viewportHeight);
         const minOffset = isVertical ? paddingY : paddingX;
         const maxOffset = isVertical
-            ? Math.max(0, (viewportHeight ?? 0 - documentHeight) / 2) - paddingY
-            : Math.max(0, (viewportWidth ?? 0 - documentWidth) / 2) - paddingX;
+            ? (viewportHeight ?? 0) - paddingY - documentHeight
+            : (viewportWidth ?? 0) - paddingX - documentWidth;
 
         const handleScroll = () => {
             const scrollValue = isVertical ? el.scrollTop : el.scrollLeft;

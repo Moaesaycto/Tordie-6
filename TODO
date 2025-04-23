@@ -3,5 +3,9 @@ Ruler:
 - There is no dynamic growth and shrinking, so with low zoom, everything is compressed and with high zoom, everything is spread appart
 - Add tick options to document menu in the controller
 
+OffsetScale:
+- Rotation not accounted for (perhaps abstract canvas occupancy coordinates to context?)
+- Zoom also not accounted for
+
 For the future:
 - DISABLE HOTKEYS!
