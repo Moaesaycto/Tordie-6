@@ -1,5 +1,4 @@
 Ruler:
-- With some weird dimensions, the horizontal ruler does not register and it leaves part of it blank
 - There is no dynamic growth and shrinking, so with low zoom, everything is compressed and with high zoom, everything is spread appart
 - Add tick options to document menu in the controller
 
