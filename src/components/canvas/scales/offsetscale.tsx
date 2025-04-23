@@ -1,5 +1,5 @@
 import { useTheme } from "@/components/theme-provider";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useLayoutEffect } from "react";
 import Config from "@/tordie.config.json";
 import { useStatus } from "@/components/status-provider";
 
@@ -18,9 +18,10 @@ const OffsetScale = ({ orientation = "vertical" }: { orientation?: "horizontal" 
     const isVertical = orientation === "vertical";
 
     // set initial scroll position
-    useEffect(() => {
+    useLayoutEffect(() => {
         const el = scrollRef.current;
         if (!el) return;
+
         const minO = isVertical ? paddingY : paddingX;
         const maxO = isVertical
             ? vpSize.current.height - paddingY - documentHeight
@@ -31,11 +32,18 @@ const OffsetScale = ({ orientation = "vertical" }: { orientation?: "horizontal" 
         const maxScroll = isVertical
             ? el.scrollHeight - el.clientHeight
             : el.scrollWidth - el.clientWidth;
-        const scrollVal = lambda * maxScroll;
 
+        const scrollVal = lambda * maxScroll;
         if (isVertical) el.scrollTop = scrollVal;
         else el.scrollLeft = scrollVal;
-    }, [paddingX, paddingY, documentHeight, documentWidth, defaultOffsetX, defaultOffsetY, isVertical]);
+    }, [
+        paddingX, paddingY,
+        documentHeight, documentWidth,
+        defaultOffsetX, defaultOffsetY,
+        isVertical,
+        vpSize.current.width,
+        vpSize.current.height,
+    ]);
 
     // observe viewport size once
     useEffect(() => {

@@ -42,21 +42,18 @@ const Ruler = ({
     const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
 
     useEffect(() => {
-        const updateViewportSize = () => {
-            const canvasViewport = document.getElementById("canvasViewport");
-            if (canvasViewport) {
-                setViewportSize({
-                    width: canvasViewport.offsetWidth,
-                    height: canvasViewport.offsetHeight,
-                });
-            }
-        };
+        const el = document.getElementById("canvasViewport");
+        if (!el) return;
 
-        updateViewportSize();
-        window.addEventListener("resize", updateViewportSize);
+        const ro = new ResizeObserver(([entry]) => {
+            const { width, height } = entry.contentRect;
+            setViewportSize({ width, height });
+        });
 
-        return () => window.removeEventListener("resize", updateViewportSize);
+        ro.observe(el);
+        return () => ro.disconnect();
     }, []);
+
 
     const isVertical = orientation === "vertical";
     const tickEnd = isVertical
