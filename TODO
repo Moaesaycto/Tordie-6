@@ -1,3 +1,7 @@
+Splashscreen:
+- public/splashscreen.html should be updated to look nicer
+- change window dimensions etc in src-tauri/tauri.conf.json
+
 Ruler:
 - There is no dynamic growth and shrinking, so with low zoom, everything is compressed and with high zoom, everything is spread appart
 - Add tick options to document menu in the controller
