@@ -89,8 +89,6 @@ const OffsetScale = ({ orientation = "vertical" }: OffsetScaleProps) => {
         defaultOffsetY,
     ]);
 
-
-
     return (
         <div
             ref={scrollRef}
