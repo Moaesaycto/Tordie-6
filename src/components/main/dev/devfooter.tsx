@@ -1,6 +1,7 @@
 import { Separator } from "@/components/ui/separator"
-import StatusDisplay from "./statusdisplay";
-import KeyDisplay from "./keydisplay";
+import StatusDisplay from "@/components/main/dev/statusdisplay";
+import KeyDisplay from "@/components/main/dev/keydisplay";
+import CoordsDisplay from "@/components/main/dev/coordsdisplay";
 
 const DevFooter = () => {
     return (
@@ -8,7 +9,10 @@ const DevFooter = () => {
             <Separator />
             <div className="flex flex-row w-full justify-between">
                 <KeyDisplay />
-                <StatusDisplay />
+                <div className="flex flex-row">
+                    <CoordsDisplay />
+                    <StatusDisplay />
+                </div>
             </div>
         </div>
     )

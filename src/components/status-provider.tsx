@@ -1,4 +1,4 @@
-import { ValidOS } from '@/types';
+import { ValidOS, Vector2 } from '@/types';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import Config from "@/tordie.config.json";
 
@@ -22,6 +22,15 @@ type CanvasStateProps = {
     setRotation: (rotation: number) => void,
     zoom: number,
     setZoom: (zoom: number) => void,
+
+    cursor: CursorStateProps,
+}
+
+type CursorStateProps = {
+    viewportCursorCoords: Vector2 | null,
+    setViewportCursorCoords: (coords: Vector2 | null) => void,
+    relativeViewportCursorCoords: Vector2 | null,
+    setRelativeViewportCursorCoords: (coords: Vector2 | null) => void,
 }
 
 type StatusProviderState = {
@@ -41,30 +50,53 @@ export function StatusProvider({
     ...props
 }: StatusProviderProps) {
     const [devMode, setDevMode] = useState<boolean>(
-        defaultState?.devMode ?? false
+        defaultState?.devMode ?? true // TODO: CHANGE TO FALSE
     );
     const [os, setOs] = useState<ValidOS>(null)
-
-    useEffect(() => {
-        const platform = navigator.userAgent.toLowerCase()
-
-        if (platform.includes("mac")) {
-            setOs("macos")
-        } else if (platform.includes("win")) {
-            setOs("windows")
-        } else if (platform.includes("linux")) {
-            setOs("linux")
-        } else {
-            setOs(null)
-        }
-    }, [])
-
     const [documentWidth, setDocumentWidth] = useState<number>(Config.canvas.defaultWidth);
     const [documentHeight, setDocumentHeight] = useState<number>(Config.canvas.defaultHeight);
     const [offsetX, setOffsetX] = useState<number>(Config.canvas.defaultOffsetX);
     const [offsetY, setOffsetY] = useState<number>(Config.canvas.defaultOffsetY);
     const [zoom, setZoom] = useState<number>(Config.canvas.defaultZoom);
     const [rotation, setRotation] = useState<number>(Config.canvas.defaultRotation);
+
+    const [viewportCursorCoords, setViewportCursorCoords] = useState<Vector2 | null>(null);
+    const [relativeViewportCursorCoords, setRelativeViewportCursorCoords] = useState<Vector2 | null>(null);
+
+    useEffect(() => {
+        const platform = navigator.userAgent.toLowerCase();
+
+        let detectedOS: ValidOS = null;
+        if (platform.includes("mac")) {
+            detectedOS = "macos";
+        } else if (platform.includes("win")) {
+            detectedOS = "windows";
+        } else if (platform.includes("linux")) {
+            detectedOS = "linux";
+        }
+
+        if (detectedOS !== os) {
+            setOs(detectedOS);
+        }
+    }, [os]);
+
+    useEffect(() => {
+        if (!viewportCursorCoords) {
+            setRelativeViewportCursorCoords(null)
+            return;
+        }
+
+        const transform = (coords: Vector2): Vector2 => {
+            return {
+                x: (coords.x - offsetX) / zoom,
+                y: (coords.y - offsetY) / zoom,
+            };
+        }
+
+        setRelativeViewportCursorCoords(transform(viewportCursorCoords))
+
+    }, [viewportCursorCoords])
+
 
     const defaultCanvas = {
         documentWidth,
@@ -79,6 +111,12 @@ export function StatusProvider({
         setZoom,
         rotation,
         setRotation,
+        cursor: {
+            viewportCursorCoords,
+            setViewportCursorCoords,
+            relativeViewportCursorCoords,
+            setRelativeViewportCursorCoords
+        }
     };
 
     const value = {

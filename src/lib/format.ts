@@ -47,3 +47,7 @@ export const formatLabel = (num: number) => {
     const str = Number(num).toPrecision(3);
     return Number(str).toString();
 };
+
+export function formatRounded(num: number, decimalPlaces: number = 3): string {
+    return num.toFixed(decimalPlaces);
+}

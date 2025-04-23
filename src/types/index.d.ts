@@ -9,6 +9,11 @@ export type CommandKey =
     | UppercaseLetter
     | ModifierKey
 
+export type Vector2 = {
+    x: number,
+    y: number,
+}
+
 type LowercaseLetter =
     | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j"
     | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t"
