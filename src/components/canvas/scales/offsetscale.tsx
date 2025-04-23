@@ -1,6 +1,6 @@
 import { useTheme } from "@/components/theme-provider";
 import { useRef, useEffect } from "react";
-import Congif from "@/tordie.config.json";
+import Config from "@/tordie.config.json";
 import { useStatus } from "@/components/status-provider";
 
 type OffsetScaleProps = {
@@ -12,39 +12,38 @@ const OffsetScale = ({ orientation = "vertical" }: OffsetScaleProps) => {
     const isVertical = orientation === "vertical";
     const scrollRef = useRef<HTMLDivElement>(null);
 
-    const { paddingX, paddingY } = Congif.canvas;
+    const { paddingX, paddingY, defaultOffsetX, defaultOffsetY } = Config.canvas;
     const { documentHeight, documentWidth, setOffsetX, setOffsetY, rotation, zoom } = useStatus().canvas;
 
     useEffect(() => {
         const el = scrollRef.current;
         if (!el) return;
 
+        // Set scrollbar theme colours
         const thumb = resolvedTheme === "dark" ? "#737373" : "#a3a3a3";
         const track = resolvedTheme === "dark" ? "#262626" : "#f5f5f5";
         el.style.setProperty("--thumb-colour", thumb);
         el.style.setProperty("--track-colour", track);
 
         const viewport = document.getElementById("canvasViewport")?.getBoundingClientRect();
-        const viewportHeight = viewport?.height;
-        const viewportWidth = viewport?.width;
+        const viewportHeight = viewport?.height ?? 0;
+        const viewportWidth = viewport?.width ?? 0;
 
-        console.log(viewportHeight);
         const minOffset = isVertical ? paddingY : paddingX;
         const maxOffset = isVertical
-            ? (viewportHeight ?? 0) - paddingY - documentHeight
-            : (viewportWidth ?? 0) - paddingX - documentWidth;
+            ? viewportHeight - paddingY - documentHeight
+            : viewportWidth - paddingX - documentWidth;
 
+        // Live scroll → offset handler
         const handleScroll = () => {
             const scrollValue = isVertical ? el.scrollTop : el.scrollLeft;
             const maxScroll = isVertical
                 ? el.scrollHeight - el.clientHeight
                 : el.scrollWidth - el.clientWidth;
 
-
             const lambda = scrollValue / maxScroll;
             const settingOffset = (1 - lambda) * minOffset + lambda * maxOffset;
 
-            console.log(settingOffset);
             if (isVertical) {
                 setOffsetY(settingOffset);
             } else {
@@ -53,8 +52,40 @@ const OffsetScale = ({ orientation = "vertical" }: OffsetScaleProps) => {
         };
 
         el.addEventListener("scroll", handleScroll);
-        return () => el.removeEventListener("scroll", handleScroll);
-    }, [resolvedTheme, isVertical]);
+
+        requestAnimationFrame(() => {
+            const maxScroll = isVertical
+                ? el.scrollHeight - el.clientHeight
+                : el.scrollWidth - el.clientWidth;
+
+            const defaultOffset = isVertical ? defaultOffsetY : defaultOffsetX;
+
+            const denom = maxOffset - minOffset || 1;
+            const lambda = (defaultOffset - minOffset) / denom;
+            const clampedLambda = Math.min(Math.max(lambda, 0), 1);
+            const scrollValue = clampedLambda * maxScroll;
+
+            if (isVertical) {
+                el.scrollTop = scrollValue;
+            } else {
+                el.scrollLeft = scrollValue;
+            }
+        });
+
+        return () => {
+            el.removeEventListener("scroll", handleScroll);
+        };
+    }, [
+        resolvedTheme,
+        isVertical,
+        paddingX,
+        paddingY,
+        documentHeight,
+        documentWidth,
+        defaultOffsetX,
+        defaultOffsetY,
+    ]);
+
 
 
     return (
