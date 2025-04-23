@@ -15,6 +15,9 @@ const OffsetScale = ({ orientation = "vertical" }: OffsetScaleProps) => {
     const { paddingX, paddingY, defaultOffsetX, defaultOffsetY } = Config.canvas;
     const { documentHeight, documentWidth, setOffsetX, setOffsetY, rotation, zoom } = useStatus().canvas;
 
+    // TODO: Incorporate rotation and zoom into bounds
+    void rotation, zoom;
+
     useEffect(() => {
         const el = scrollRef.current;
         if (!el) return;
@@ -34,7 +37,7 @@ const OffsetScale = ({ orientation = "vertical" }: OffsetScaleProps) => {
             ? viewportHeight - paddingY - documentHeight
             : viewportWidth - paddingX - documentWidth;
 
-        // Live scroll → offset handler
+        // Live scroll offset handler
         const handleScroll = () => {
             const scrollValue = isVertical ? el.scrollTop : el.scrollLeft;
             const maxScroll = isVertical
