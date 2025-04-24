@@ -1,9 +1,10 @@
-import React, { useLayoutEffect, useState, useRef, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useStatus } from '@/components/status-provider';
 import { formatLabel } from '@/lib/format';
 import Config from '@/tordie.config.json';
 import { getNiceStepSize, rotatePoint } from '@/lib/math';
 import { useTheme } from '@/components/theme-provider';
+import { generateTicks } from '@/lib/ticks';
 
 const {
     ruler: { minorDivisions, subMinorDivisions, thickness, majorLength, minorLength, subLength },
@@ -15,71 +16,48 @@ const colourSchemes = {
 };
 
 type RulerProps = { orientation?: 'vertical' | 'horizontal'; className?: string };
-type Tick = { posPx: number; level: 'major' | 'minor' | 'sub'; label?: string };
 
 const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '' }) => {
-    const { offsetX = 0, offsetY = 0, zoom = 1, rotation = 0, documentHeight = 0, documentWidth = 0 } = useStatus().canvas;
-    const { viewportCursorCoords } = useStatus().canvas.cursor;
+    const {
+        offsetX,
+        offsetY,
+        zoom,
+        rotation,
+        documentHeight,
+        documentWidth,
+        cursor: { viewportCursorCoords },
+    } = useStatus().canvas;
+
+    const {
+        viewportWidth,
+        viewportHeight,
+    } = useStatus().viewport;
+
+
     const { resolvedTheme } = useTheme();
     const isVertical = orientation === 'vertical';
 
-    // Memoise colours lookup
     const colours = useMemo(
         () => colourSchemes[resolvedTheme as keyof typeof colourSchemes] || colourSchemes.light,
         [resolvedTheme]
     );
 
-    // Observe viewport size
-    const viewportRef = useRef<HTMLElement | null>(null);
-    const [{ width, height }, setSize] = useState({ width: 0, height: 0 });
+    const lengthPx = isVertical ? viewportHeight : viewportWidth;
 
-    useLayoutEffect(() => {
-        const el = (viewportRef.current = document.getElementById('canvasViewport'));
-        if (!el) return;
-        const ro = new ResizeObserver(([entry]) => {
-            const { width, height } = entry.contentRect;
-            if (width && height) setSize({ width, height });
-        });
-        ro.observe(el);
-        return () => ro.disconnect();
-    }, []);
+    const ticks = useMemo(() => generateTicks({
+        lengthPx,
+        zoom,
+        offset: isVertical ? offsetY : offsetX,
+        getNiceStepSize,
+        majorLength,
+        minorLength,
+        subLength,
+        minorDivisions,
+        subMinorDivisions,
+        formatLabel
+      }), [lengthPx, zoom, offsetX, offsetY, isVertical]);
+      
 
-    const lengthPx = isVertical ? height : width;
-    const tickEnd = lengthPx;
-
-    // Precompute ticks and pixel positions
-    const ticks = useMemo<Tick[]>(() => {
-        const majorInterval = getNiceStepSize(lengthPx, zoom);
-
-        if (!lengthPx || zoom <= 0) return [];
-        const screenOffset = isVertical ? offsetY : offsetX;
-        const viewStart = -screenOffset / zoom;
-        const viewEnd = (tickEnd - screenOffset) / zoom;
-        const startIdx = Math.floor(viewStart / majorInterval);
-        const endIdx = Math.ceil(viewEnd / majorInterval);
-        const out: Tick[] = [];
-
-        for (let i = startIdx; i <= endIdx; i++) {
-            const baseVal = i * majorInterval;
-            const majorPos = baseVal * zoom + screenOffset;
-            if (majorPos < -majorLength || majorPos > tickEnd + majorLength) continue;
-            out.push({ posPx: majorPos, level: 'major', label: formatLabel(baseVal) });
-
-            for (let j = -minorDivisions; j < minorDivisions; j++) {
-                const pos = (baseVal + (j * majorInterval) / minorDivisions) * zoom + screenOffset;
-                if (pos < -minorLength || pos > tickEnd + minorLength) continue;
-                out.push({ posPx: pos, level: 'minor' });
-            }
-            for (let j = -minorDivisions * subMinorDivisions; j < minorDivisions * subMinorDivisions; j++) {
-                const pos = (baseVal + (j * majorInterval) / (minorDivisions * subMinorDivisions)) * zoom + screenOffset;
-                if (pos < -subLength || pos > tickEnd + subLength) continue;
-                out.push({ posPx: pos, level: 'sub' });
-            }
-        }
-        return out;
-    }, [lengthPx, zoom, offsetX, offsetY, isVertical]);
-
-    // Compute overlap box
     const overlap = useMemo(() => {
         const coords = [
             rotatePoint(0, 0, rotation),
@@ -94,9 +72,8 @@ const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '
         return { start, len };
     }, [rotation, documentHeight, documentWidth, zoom, offsetX, offsetY, isVertical]);
 
-    const svgW = isVertical ? thickness : width;
-    const svgH = isVertical ? height : thickness;
-
+    const svgW = isVertical ? thickness : viewportWidth;
+    const svgH = isVertical ? viewportHeight : thickness;
     const cursorPosPx = isVertical ? viewportCursorCoords?.y : viewportCursorCoords?.x;
 
     return (
@@ -149,16 +126,15 @@ const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '
                     isVertical ? (
                         <polygon
                             points={`0,${cursorPosPx - 5} 0,${cursorPosPx + 5} 6,${cursorPosPx}`}
-                            fill={resolvedTheme === "dark" ? "white" : "black"}
+                            fill={resolvedTheme === 'dark' ? 'white' : 'black'}
                         />
                     ) : (
                         <polygon
                             points={`${cursorPosPx - 5},0 ${cursorPosPx + 5},0 ${cursorPosPx},6`}
-                            fill={resolvedTheme === "dark" ? "white" : "black"}
+                            fill={resolvedTheme === 'dark' ? 'white' : 'black'}
                         />
                     )
                 )}
-
             </svg>
         </div>
     );

@@ -1,5 +1,5 @@
 import { ValidOS, Vector2 } from '@/types';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import Config from "@/tordie.config.json";
 
 type StatusProviderProps = {
@@ -33,6 +33,11 @@ type CursorStateProps = {
     setRelativeViewportCursorCoords: (coords: Vector2 | null) => void,
 }
 
+type ViewportStateProps = {
+    viewportWidth: number;
+    viewportHeight: number;
+}
+
 type StatusProviderState = {
     devMode: boolean
     setDevMode: (state: boolean) => void
@@ -40,6 +45,7 @@ type StatusProviderState = {
     os: ValidOS
     setOs: (os: ValidOS) => void
     canvas: CanvasStateProps
+    viewport: ViewportStateProps
 }
 
 const StatusProviderContext = createContext<StatusProviderState | undefined>(undefined);
@@ -62,6 +68,8 @@ export function StatusProvider({
 
     const [viewportCursorCoords, setViewportCursorCoords] = useState<Vector2 | null>(null);
     const [relativeViewportCursorCoords, setRelativeViewportCursorCoords] = useState<Vector2 | null>(null);
+    const [viewportWidth, setViewportWidth] = useState(0);
+    const [viewportHeight, setViewportHeight] = useState(0);
 
     useEffect(() => {
         const platform = navigator.userAgent.toLowerCase();
@@ -97,6 +105,20 @@ export function StatusProvider({
 
     }, [viewportCursorCoords])
 
+    useLayoutEffect(() => {
+        const el = document.getElementById('canvasViewport');
+        if (!el) return;
+        const ro = new ResizeObserver(([entry]) => {
+            const { width, height } = entry.contentRect;
+            if (width && height) {
+                setViewportWidth(width);
+                setViewportHeight(height);
+            }
+        });
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
+
 
     const defaultCanvas = {
         documentWidth,
@@ -116,8 +138,13 @@ export function StatusProvider({
             setViewportCursorCoords,
             relativeViewportCursorCoords,
             setRelativeViewportCursorCoords
-        }
+        },
     };
+
+    const defaultViewport = {
+        viewportWidth,
+        viewportHeight,
+    }
 
     const value = {
         devMode,
@@ -125,6 +152,7 @@ export function StatusProvider({
         os,
         setOs,
         canvas: defaultCanvas,
+        viewport: defaultViewport
     }
 
     return (
