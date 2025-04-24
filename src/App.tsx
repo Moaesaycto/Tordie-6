@@ -41,7 +41,7 @@ function App() {
   }, [recalc]);
 
   return (
-    <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono" >
+    <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono overflow-hidden" >
       <Header />
 
       <main className="flex h-full flex-col overflow-hidden">

@@ -12,6 +12,10 @@
     "ruler": {
         "majorLength": 10,
         "minorLength": 8,
-        "subLength": 3
+        "subLength": 3,
+        "majorInterval": 100,
+        "minorDivisions": 3,
+        "subMinorDivisions": 4,
+        "thickness": 20
     }
 }
