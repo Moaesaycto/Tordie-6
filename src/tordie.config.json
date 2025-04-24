@@ -13,9 +13,9 @@
         "majorLength": 10,
         "minorLength": 8,
         "subLength": 3,
-        "majorInterval": 100,
-        "minorDivisions": 3,
-        "subMinorDivisions": 4,
+        "majorInterval": 16.4,
+        "minorDivisions": 2,
+        "subMinorDivisions": 5,
         "thickness": 20
     }
 }

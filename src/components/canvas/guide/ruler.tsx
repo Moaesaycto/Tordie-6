@@ -2,12 +2,11 @@ import React, { useLayoutEffect, useState, useRef, useMemo } from 'react';
 import { useStatus } from '@/components/status-provider';
 import { formatLabel } from '@/lib/format';
 import Config from '@/tordie.config.json';
-import { rotatePoint } from '@/lib/math';
+import { getNiceStepSize, rotatePoint } from '@/lib/math';
 import { useTheme } from '@/components/theme-provider';
 
-// Destructure static config once
 const {
-    ruler: { majorInterval, minorDivisions, subMinorDivisions, thickness, majorLength, minorLength, subLength },
+    ruler: { minorDivisions, subMinorDivisions, thickness, majorLength, minorLength, subLength },
 } = Config;
 
 const colourSchemes = {
@@ -20,6 +19,7 @@ type Tick = { posPx: number; level: 'major' | 'minor' | 'sub'; label?: string };
 
 const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '' }) => {
     const { offsetX = 0, offsetY = 0, zoom = 1, rotation = 0, documentHeight = 0, documentWidth = 0 } = useStatus().canvas;
+    const { viewportCursorCoords } = useStatus().canvas.cursor;
     const { resolvedTheme } = useTheme();
     const isVertical = orientation === 'vertical';
 
@@ -49,6 +49,8 @@ const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '
 
     // Precompute ticks and pixel positions
     const ticks = useMemo<Tick[]>(() => {
+        const majorInterval = getNiceStepSize(lengthPx, zoom);
+
         if (!lengthPx || zoom <= 0) return [];
         const screenOffset = isVertical ? offsetY : offsetX;
         const viewStart = -screenOffset / zoom;
@@ -94,6 +96,8 @@ const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '
 
     const svgW = isVertical ? thickness : width;
     const svgH = isVertical ? height : thickness;
+
+    const cursorPosPx = isVertical ? viewportCursorCoords?.y : viewportCursorCoords?.x;
 
     return (
         <div style={{ overflow: 'hidden' }} className={className}>
@@ -141,6 +145,20 @@ const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '
                         </g>
                     );
                 })}
+                {cursorPosPx && (
+                    isVertical ? (
+                        <polygon
+                            points={`0,${cursorPosPx - 5} 0,${cursorPosPx + 5} 6,${cursorPosPx}`}
+                            fill={resolvedTheme === "dark" ? "white" : "black"}
+                        />
+                    ) : (
+                        <polygon
+                            points={`${cursorPosPx - 5},0 ${cursorPosPx + 5},0 ${cursorPosPx},6`}
+                            fill={resolvedTheme === "dark" ? "white" : "black"}
+                        />
+                    )
+                )}
+
             </svg>
         </div>
     );
