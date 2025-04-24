@@ -2,9 +2,10 @@ import React, { useMemo } from 'react';
 import { useStatus } from '@/components/status-provider';
 import { formatLabel } from '@/lib/format';
 import Config from '@/tordie.config.json';
-import { getNiceStepSize, rotatePoint } from '@/lib/math';
+import { getNiceStepSize } from '@/lib/math';
 import { useTheme } from '@/components/theme-provider';
 import { generateTicks } from '@/lib/ticks';
+import { getRotatedDocumentBounds } from '@/lib/canvasbounds';
 
 const {
     ruler: { minorDivisions, subMinorDivisions, thickness, majorLength, minorLength, subLength },
@@ -55,22 +56,20 @@ const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '
         minorDivisions,
         subMinorDivisions,
         formatLabel
-      }), [lengthPx, zoom, offsetX, offsetY, isVertical]);
-      
+    }), [lengthPx, zoom, offsetX, offsetY, isVertical]);
 
-    const overlap = useMemo(() => {
-        const coords = [
-            rotatePoint(0, 0, rotation),
-            rotatePoint(0, documentHeight, rotation),
-            rotatePoint(documentWidth, 0, rotation),
-            rotatePoint(documentWidth, documentHeight, rotation),
-        ].map(p => (isVertical ? p.y : p.x));
-        const min = Math.min(...coords);
-        const max = Math.max(...coords);
-        const start = min * zoom + (isVertical ? offsetY : offsetX);
-        const len = Math.max(0, (max - min) * zoom);
-        return { start, len };
-    }, [rotation, documentHeight, documentWidth, zoom, offsetX, offsetY, isVertical]);
+
+    const overlap = useMemo(() =>
+        getRotatedDocumentBounds({
+            width: documentWidth,
+            height: documentHeight,
+            rotation,
+            zoom,
+            offset: isVertical ? offsetY : offsetX,
+            isVertical
+        }), [rotation, documentHeight, documentWidth, zoom, offsetX, offsetY, isVertical]
+    );
+
 
     const svgW = isVertical ? thickness : viewportWidth;
     const svgH = isVertical ? viewportHeight : thickness;
