@@ -34,7 +34,6 @@ const Ruler: React.FC<RulerProps> = ({ orientation = 'horizontal', className = '
         viewportHeight,
     } = useStatus().viewport;
 
-
     const { resolvedTheme } = useTheme();
     const isVertical = orientation === 'vertical';
 
