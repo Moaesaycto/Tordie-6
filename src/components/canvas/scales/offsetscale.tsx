@@ -23,6 +23,7 @@ const OffsetScale = ({
     const { viewportWidth, viewportHeight } = useStatus().viewport;
 
     const scrollRef = useRef<HTMLDivElement>(null);
+    const userScrollingRef = useRef(false);
 
     const lowerBoundRef = useRef(0);
     const upperBoundRef = useRef(0);
@@ -54,10 +55,12 @@ const OffsetScale = ({
             else thumb.style.width = `${thumbPercent}%`;
         }
 
-        // Inverted scroll position
         const scrollPos = upper - offset;
-        if (isVertical) el.scrollTop = scrollPos;
-        else el.scrollLeft = scrollPos;
+        if (!userScrollingRef.current) {
+            if (isVertical) el.scrollTop = scrollPos;
+            else el.scrollLeft = scrollPos;
+        }
+        userScrollingRef.current = false;
     }, [
         isVertical,
         zoom,
@@ -82,6 +85,7 @@ const OffsetScale = ({
                 const newOffset = upperBoundRef.current - pos;
                 if (isVertical) setOffsetY(newOffset);
                 else setOffsetX(newOffset);
+                userScrollingRef.current = true;
                 ticking = false;
             });
         };
