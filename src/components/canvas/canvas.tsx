@@ -1,6 +1,7 @@
 import Ruler from "@/components/canvas/guide/ruler";
 import CanvasRenderer from "@/components/canvas/render/canvasrenderer";
-import OffsetScale from "./scales/offsetscale";
+import OffsetScale from "@/components/canvas/scales/offsetscale";
+import ToOriginButton from "@/components/canvas/guide/homebutton";
 
 const RULER_SIZE = 20;
 const SCROLL_SIZE = 17;
@@ -19,7 +20,7 @@ const Canvas = () => {
                     }}
                 >
                     {/* Top-left corner */}
-                    {corner}
+                    <ToOriginButton />
 
                     {/* Top ruler */}
                     <Ruler orientation="horizontal" />
