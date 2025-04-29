@@ -5,8 +5,9 @@ import { useStatus } from "@/components/status-provider";
 const CanvasRenderer = () => {
     const { documentWidth, documentHeight, offsetX, offsetY, zoom, rotation } = useStatus().canvas;
     const viewportRef = useRef<HTMLDivElement>(null);
+    const pageRef = useRef<HTMLDivElement>(null); // NEW: page ref
 
-    useCanvasViewportControls(viewportRef);
+    useCanvasViewportControls(viewportRef, pageRef);
 
     return (
         <div
@@ -15,6 +16,7 @@ const CanvasRenderer = () => {
             className="relative w-full h-full overflow-hidden bg-neutral-700"
         >
             <div
+                ref={pageRef} // Attach pageRef here
                 id="canvasPage"
                 className="absolute bg-white"
                 style={{

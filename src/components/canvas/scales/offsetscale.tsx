@@ -1,113 +1,74 @@
-import { useTheme } from "@/components/theme-provider";
 import { useRef, useLayoutEffect, useEffect } from "react";
-import Config from "@/tordie.config.json";
+import { useTheme } from "@/components/theme-provider";
 import { useStatus } from "@/components/status-provider";
+import Config from "@/tordie.config.json";
 
-const OffsetScale = ({
-    orientation = "vertical",
-}: {
-    orientation?: "horizontal" | "vertical";
-}) => {
-    const isVertical = orientation === "vertical";
-    const { resolvedTheme } = useTheme();
-    const { paddingX, paddingY } = Config.canvas;
-    const {
-        documentWidth,
-        documentHeight,
-        offsetX,
-        offsetY,
-        setOffsetX,
-        setOffsetY,
-        zoom,
-    } = useStatus().canvas;
-    const { viewportWidth, viewportHeight } = useStatus().viewport;
+const OffsetScale = ({ orientation = "vertical" }: { orientation?: "horizontal" | "vertical" }) => {
+  const vert = orientation === "vertical";
+  const { resolvedTheme } = useTheme();
+  const {
+    canvas: { documentWidth, documentHeight, offsetX, offsetY, setOffsetX, setOffsetY, zoom },
+    viewport: { viewportWidth, viewportHeight },
+  } = useStatus();
 
-    const scrollRef = useRef<HTMLDivElement>(null);
-    const userScrollingRef = useRef(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const thumbRef = useRef<HTMLDivElement>(null);
+  const skip = useRef(false);
+  const upper = useRef(0);
 
-    const lowerBoundRef = useRef(0);
-    const upperBoundRef = useRef(0);
-    const rangeRef = useRef(1);
+  const view = vert ? viewportHeight : viewportWidth;
+  const doc = vert ? documentHeight : documentWidth;
+  const pad = vert ? Config.canvas.paddingY : Config.canvas.paddingX;
+  const offPx = (vert ? offsetY : offsetX) * zoom;
 
-    const viewSize = isVertical ? viewportHeight : viewportWidth;
-    const docSize = isVertical ? documentHeight : documentWidth;
-    const pad = isVertical ? paddingY : paddingX;
-    const offset = isVertical ? offsetY : offsetX;
+  useLayoutEffect(() => {
+    const s = scrollRef.current;
+    const t = thumbRef.current;
+    if (!s || !t) return;
 
-    useLayoutEffect(() => {
-        const el = scrollRef.current;
-        if (!el) return;
+    const pMin = zoom * pad;
+    const pMax = Math.min(pMin, view - zoom * (pad + doc));
+    const low = Math.min(pMax, offPx);
+    const hi = Math.max(pMin, offPx);
+    upper.current = hi;
 
-        const padMin = zoom * pad;
-        const padMax = Math.min(padMin, viewSize - zoom * (pad + docSize));
+    const size = view + Math.max(hi - low, 1);
+    if (vert) t.style.height = `${size}px`;
+    else t.style.width = `${size}px`;
 
-        const lower = Math.min(padMax, offset);
-        const upper = Math.max(padMin, offset);
+    const want = hi - offPx;
+    if (Math.abs((vert ? s.scrollTop : s.scrollLeft) - want) > 0.1) {
+      skip.current = true;
+      if (vert) s.scrollTop = want;
+      else s.scrollLeft = want;
+      requestAnimationFrame(() => (skip.current = false));
+    }
+  }, [vert, offPx, zoom, pad, view, doc]);
 
-        lowerBoundRef.current = lower;
-        upperBoundRef.current = upper;
-        rangeRef.current = Math.max(upper - lower, 1);
+  useEffect(() => {
+    const s = scrollRef.current;
+    if (!s) return;
+    const onScroll = () => {
+      if (skip.current) return;
+      const pos = vert ? s.scrollTop : s.scrollLeft;
+      const v = (upper.current - pos) / zoom;
+      if (vert) setOffsetY(v);
+      else setOffsetX(v);
+    };
+    s.addEventListener("scroll", onScroll, { passive: true });
+    return () => s.removeEventListener("scroll", onScroll);
+  }, [vert, setOffsetX, setOffsetY, zoom]);
 
-        const thumb = el.firstElementChild as HTMLDivElement | null;
-        if (thumb) {
-            const thumbPercent = 100 + (rangeRef.current / viewSize) * 100;
-            if (isVertical) thumb.style.height = `${thumbPercent}%`;
-            else thumb.style.width = `${thumbPercent}%`;
-        }
-
-        const scrollPos = upper - offset;
-        if (!userScrollingRef.current) {
-            if (isVertical) el.scrollTop = scrollPos;
-            else el.scrollLeft = scrollPos;
-        }
-        userScrollingRef.current = false;
-    }, [
-        isVertical,
-        zoom,
-        viewSize,
-        docSize,
-        pad,
-        offset,
-    ]);
-
-    useEffect(() => {
-        const el = scrollRef.current;
-        if (!el) return;
-
-        let ticking = false;
-
-        const onScroll = () => {
-            if (ticking) return;
-            ticking = true;
-
-            requestAnimationFrame(() => {
-                const pos = isVertical ? el.scrollTop : el.scrollLeft;
-                const newOffset = upperBoundRef.current - pos;
-                if (isVertical) setOffsetY(newOffset);
-                else setOffsetX(newOffset);
-                userScrollingRef.current = true;
-                ticking = false;
-            });
-        };
-
-        el.addEventListener("scroll", onScroll, { passive: true });
-        return () => el.removeEventListener("scroll", onScroll);
-    }, [isVertical, setOffsetX, setOffsetY]);
-
-    return (
-        <div
-            id="offsetScale"
-            ref={scrollRef}
-            className={`
-        ${isVertical ? "overflow-y-scroll h-full w-4" : "overflow-x-scroll w-full h-4"}
-        scrollbar-thin
-        ${resolvedTheme === "dark" ? "scrollbar-dark" : "scrollbar-light"}
-      `}
-            style={{ WebkitOverflowScrolling: "touch" }}
-        >
-            <div />
-        </div>
-    );
+  return (
+    <div
+      ref={scrollRef}
+      className={`${vert ? "overflow-y-scroll h-full w-4" : "overflow-x-scroll w-full h-4"} scrollbar-thin ${
+        resolvedTheme === "dark" ? "scrollbar-dark" : "scrollbar-light"
+      }`}
+    >
+      <div ref={thumbRef} />
+    </div>
+  );
 };
 
 export default OffsetScale;
