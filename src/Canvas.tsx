@@ -19,8 +19,8 @@ const Canvas = () => {
         <div
           className="grid h-full w-full min-w-0"
           style={{
-            gridTemplateColumns: `${RULER_SIZE}px 1fr ${SCROLL_SIZE}px`,
-            gridTemplateRows: `${RULER_SIZE}px 1fr ${SCROLL_SIZE}px`,
+            gridTemplateColumns: `${RULER_SIZE}px minmax(0,1fr) ${SCROLL_SIZE}px`,
+            gridTemplateRows: `${RULER_SIZE}px minmax(0,1fr) ${SCROLL_SIZE}px`,
           }}
         >
           <ToOriginButton />

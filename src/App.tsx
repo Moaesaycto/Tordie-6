@@ -52,7 +52,7 @@ function App() {
           <ResizablePanel
             defaultSize={70}
             minSize={30}
-            className="h-full min-w-0"
+            className="h-full"
           >
             <Canvas />
           </ResizablePanel>
