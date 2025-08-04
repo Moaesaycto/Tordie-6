@@ -62,9 +62,8 @@ const OffsetScale = ({ orientation = "vertical" }: { orientation?: "horizontal" 
   return (
     <div
       ref={scrollRef}
-      className={`${vert ? "overflow-y-scroll h-full w-4" : "overflow-x-scroll w-full h-4"} scrollbar-thin ${
-        resolvedTheme === "dark" ? "scrollbar-dark" : "scrollbar-light"
-      }`}
+      className={`${vert ? "overflow-y-scroll h-full w-4" : "overflow-x-scroll w-full h-4"} scrollbar-thin ${resolvedTheme === "dark" ? "scrollbar-dark" : "scrollbar-light"
+        }`}
     >
       <div ref={thumbRef} />
     </div>

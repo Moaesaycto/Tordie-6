@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/resizable";
 import Header from "@/components/main/header";
 import Footer from "@/components/main/footer";
-import Canvas from "@/components/canvas/canvas";
+import Canvas from "@/Canvas";
 import { Controller } from "./components/controller/controller";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 
