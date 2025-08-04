@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useSnapshot } from 'valtio'
 import { state } from '@/CanvasState'
 import { generateTicks } from '@/lib/ticks'
@@ -11,13 +11,9 @@ const SUB_LENGTH = 3
 const MINOR_DIVISIONS = 5
 const SUB_DIVISIONS = 2
 
-const colourSchemes = {
-  dark: { background: '#262626', overlap: '#404040', text: 'white' },
-  light: { background: '#dbdbdb', overlap: '#bababa', text: 'black' },
-}
-
 const formatLabel = (val: number) => val.toFixed(0)
 const getNiceStepSize = (len: number, zoom: number) => {
+  void len
   const pixelsPerUnit = zoom
   const minSpacing = 50
   const rawStep = minSpacing / pixelsPerUnit
@@ -27,9 +23,15 @@ const getNiceStepSize = (len: number, zoom: number) => {
   return step * magnitude
 }
 
+const colourSchemes = {
+  dark: { background: '#262626', overlap: '#404040', text: 'white' },
+  light: { background: '#dbdbdb', overlap: '#bababa', text: 'black' },
+}
+
 type RulerProps = { orientation: 'horizontal' | 'vertical' }
 
-const Ruler: React.FC<RulerProps> = ({ orientation }) => {
+const CanvasRuler: React.FC<RulerProps> = ({ orientation }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const snap = useSnapshot(state)
   const { resolvedTheme } = useTheme()
   const colours = colourSchemes[resolvedTheme as 'dark' | 'light'] ?? colourSchemes.light
@@ -39,9 +41,6 @@ const Ruler: React.FC<RulerProps> = ({ orientation }) => {
   const offset = isVertical ? snap.pan.y : snap.pan.x
   const lengthPx = isVertical ? snap.viewport.height : snap.viewport.width
   const documentLength = isVertical ? snap.document?.height ?? 1000 : snap.document?.width ?? 1000
-
-  const svgW = isVertical ? RULER_THICKNESS : lengthPx
-  const svgH = isVertical ? lengthPx : RULER_THICKNESS
 
   const ticks = generateTicks({
     lengthPx,
@@ -56,56 +55,80 @@ const Ruler: React.FC<RulerProps> = ({ orientation }) => {
     formatLabel,
   })
 
-  const docStartPx = offset + 0 * zoom
-  const docLengthPx = documentLength * zoom
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const w = isVertical ? RULER_THICKNESS : lengthPx
+    const h = isVertical ? lengthPx : RULER_THICKNESS
+    canvas.width = w * window.devicePixelRatio
+    canvas.height = h * window.devicePixelRatio
+    canvas.style.width = `${w}px`
+    canvas.style.height = `${h}px`
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+
+    // Background
+    ctx.fillStyle = colours.background
+    ctx.fillRect(0, 0, w, h)
+
+    // Document region highlight
+    const docStartPx = offset
+    const docLengthPx = documentLength * zoom
+    ctx.fillStyle = colours.overlap
+    if (isVertical) {
+      ctx.fillRect(0, docStartPx, RULER_THICKNESS, docLengthPx)
+    } else {
+      ctx.fillRect(docStartPx, 0, docLengthPx, RULER_THICKNESS)
+    }
+
+    // Ticks and labels
+    ctx.strokeStyle = colours.text
+    ctx.fillStyle = colours.text
+    ctx.font = '8px sans-serif'
+    ctx.textBaseline = 'middle'
+
+    for (const t of ticks) {
+      const len =
+        t.level === 'major' ? MAJOR_LENGTH :
+          t.level === 'minor' ? MINOR_LENGTH :
+            SUB_LENGTH
+
+      if (isVertical) {
+        ctx.beginPath()
+        ctx.moveTo(0, t.posPx)
+        ctx.lineTo(len, t.posPx)
+        ctx.stroke()
+        if (t.level === 'major') {
+          ctx.save()
+          ctx.translate(2, t.posPx)
+          ctx.rotate(-Math.PI / 2)
+          ctx.fillText(t.label ?? "", 0, 0)
+          ctx.restore()
+        }
+      } else {
+        ctx.beginPath()
+        ctx.moveTo(t.posPx, 0)
+        ctx.lineTo(t.posPx, len)
+        ctx.stroke()
+        if (t.level === 'major') {
+          ctx.textAlign = 'center'
+          ctx.fillText(t.label ?? "", t.posPx, 10)
+        }
+      }
+    }
+  }, [isVertical, zoom, offset, lengthPx, documentLength, ticks, colours])
 
   return (
-    <svg width={svgW} height={svgH}>
-      {/* Background */}
-      <rect width="100%" height="100%" fill={colours.background} />
-
-      {/* Document region highlight */}
-      <rect
-        x={!isVertical ? docStartPx : 0}
-        y={isVertical ? docStartPx : 0}
-        width={!isVertical ? docLengthPx : RULER_THICKNESS}
-        height={isVertical ? docLengthPx : RULER_THICKNESS}
-        fill={colours.overlap}
-      />
-
-      {/* Ticks */}
-      {ticks.map((t, i) => {
-        const len =
-          t.level === 'major' ? MAJOR_LENGTH : t.level === 'minor' ? MINOR_LENGTH : SUB_LENGTH
-
-        return (
-          <g key={i}>
-            <line
-              x1={isVertical ? 0 : t.posPx}
-              y1={isVertical ? t.posPx : 0}
-              x2={isVertical ? len : t.posPx}
-              y2={isVertical ? t.posPx : len}
-              stroke={colours.text}
-              strokeWidth={1}
-            />
-            {t.level === 'major' && (
-              <text
-                x={isVertical ? 2 : t.posPx}
-                y={isVertical ? t.posPx : 10}
-                fontSize={8}
-                fill={colours.text}
-                textAnchor={isVertical ? 'start' : 'middle'}
-                dominantBaseline="middle"
-                transform={isVertical ? `rotate(-90, 2, ${t.posPx})` : undefined}
-              >
-                {t.label}
-              </text>
-            )}
-          </g>
-        )
-      })}
-    </svg>
+    <canvas
+      ref={canvasRef}
+      style={{
+        display: 'block',
+        background: colours.background,
+      }}
+    />
   )
 }
 
-export default React.memo(Ruler)
+export default React.memo(CanvasRuler)

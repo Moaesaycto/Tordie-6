@@ -4,55 +4,85 @@ import { useSnapshot } from 'valtio'
 
 export default function CanvasRenderer() {
   const snap = useSnapshot(state)
-  const svgRef = useRef<SVGSVGElement>(null)
-  const transformRef = useRef<SVGGElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const wrapperRef = useRef<HTMLDivElement>(null)
 
-  // Observe canvas resize
+  // Resize canvas to match container
   useEffect(() => {
-    const observer = new ResizeObserver(entries => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect
-        state.viewport.width = width
-        state.viewport.height = height
-      }
-    })
-    if (svgRef.current) observer.observe(svgRef.current)
+    const resize = () => {
+      const canvas = canvasRef.current
+      const wrapper = wrapperRef.current
+      if (!canvas || !wrapper) return
+
+      const { width, height } = wrapper.getBoundingClientRect()
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+    }
+
+    const observer = new ResizeObserver(resize)
+    if (wrapperRef.current) observer.observe(wrapperRef.current)
+
+    resize() // Initial sizing
+
     return () => observer.disconnect()
   }, [])
 
-  // Imperative pan/zoom update
+  // Drawing
   useEffect(() => {
-    let frame: number
-    const update = () => {
-      transformRef.current?.setAttribute(
-        'transform',
-        `translate(${state.pan.x}, ${state.pan.y}) scale(${state.zoom})`
-      )
-      frame = requestAnimationFrame(update)
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const dpr = window.devicePixelRatio || 1
+
+    const draw = () => {
+      ctx.save()
+      ctx.setTransform(1, 0, 0, 1, 0, 0) // reset
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+      ctx.scale(dpr, dpr)
+      ctx.setTransform(snap.zoom, 0, 0, snap.zoom, snap.pan.x, snap.pan.y)
+
+      ctx.beginPath()
+      ctx.arc(snap.circle.x, snap.circle.y, 20, 0, Math.PI * 2)
+      ctx.fillStyle = 'tomato'
+      ctx.fill()
+      ctx.restore()
+
+      requestAnimationFrame(draw)
     }
-    frame = requestAnimationFrame(update)
-    return () => cancelAnimationFrame(frame)
-  }, [])
+
+    draw()
+  }, [snap])
+
+  const getCanvasPoint = (e: React.MouseEvent) => {
+    const bounds = canvasRef.current!.getBoundingClientRect()
+    return {
+      x: e.clientX - bounds.left,
+      y: e.clientY - bounds.top,
+    }
+  }
 
   const onWheel = (e: React.WheelEvent) => {
     e.preventDefault()
-    const bounds = svgRef.current?.getBoundingClientRect()
-    const { left, top } = bounds!
-    const cursorX = e.clientX - left
-    const cursorY = e.clientY - top
+    const { x, y } = getCanvasPoint(e)
 
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
     const newZoom = state.zoom * zoomFactor
 
-    state.pan.x = cursorX - ((cursorX - state.pan.x) / state.zoom) * newZoom
-    state.pan.y = cursorY - ((cursorY - state.pan.y) / state.zoom) * newZoom
+    state.pan.x = x - ((x - state.pan.x) / state.zoom) * newZoom
+    state.pan.y = y - ((y - state.pan.y) / state.zoom) * newZoom
     state.zoom = newZoom
   }
 
   const onMouseDown = (e: React.MouseEvent) => {
-    const bounds = svgRef.current?.getBoundingClientRect()
-    const x = (e.clientX - bounds!.left - state.pan.x) / state.zoom
-    const y = (e.clientY - bounds!.top - state.pan.y) / state.zoom
+    const { x, y } = getCanvasPoint(e)
+    const wx = (x - state.pan.x) / state.zoom
+    const wy = (y - state.pan.y) / state.zoom
 
     if (e.button === 1) {
       state.middlePanning = true
@@ -61,8 +91,8 @@ export default function CanvasRenderer() {
       return
     }
 
-    const dx = x - state.circle.x
-    const dy = y - state.circle.y
+    const dx = wx - state.circle.x
+    const dy = wy - state.circle.y
     if (Math.hypot(dx, dy) < 20) {
       state.dragging = true
       state.dragOffset = { x: dx, y: dy }
@@ -70,7 +100,6 @@ export default function CanvasRenderer() {
   }
 
   const onMouseMove = (e: React.MouseEvent) => {
-    const bounds = svgRef.current?.getBoundingClientRect()
     if (state.middlePanning) {
       const dx = e.clientX - state.lastMouse.x
       const dy = e.clientY - state.lastMouse.y
@@ -81,11 +110,12 @@ export default function CanvasRenderer() {
     }
 
     if (state.dragging) {
-      const x = (e.clientX - bounds!.left - state.pan.x) / state.zoom
-      const y = (e.clientY - bounds!.top - state.pan.y) / state.zoom
+      const { x, y } = getCanvasPoint(e)
+      const wx = (x - state.pan.x) / state.zoom
+      const wy = (y - state.pan.y) / state.zoom
       state.circle = {
-        x: x - state.dragOffset.x,
-        y: y - state.dragOffset.y,
+        x: wx - state.dragOffset.x,
+        y: wy - state.dragOffset.y,
       }
     }
   }
@@ -96,24 +126,20 @@ export default function CanvasRenderer() {
   }
 
   return (
-    <svg
-      ref={svgRef}
-      width="99%"
-      height="100%"
-      onWheel={onWheel}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      style={{
-        background: '#f8f8f8',
-        touchAction: 'none',
-        cursor: snap.middlePanning ? 'grabbing' : 'default',
-        overflow: 'hidden', // Stops default scrolling, hopefully
-      }}
-    >
-      <g ref={transformRef}>
-        <circle cx={snap.circle.x} cy={snap.circle.y} r={20} fill="tomato" />
-      </g>
-    </svg>
+    <div ref={wrapperRef} className="flex flex-col min-w-0 min-h-0 w-full h-full">
+      <canvas
+        ref={canvasRef}
+        onWheel={onWheel}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        style={{
+          display: 'block',
+          background: '#f8f8f8',
+          touchAction: 'none',
+          cursor: snap.middlePanning ? 'grabbing' : 'default',
+        }}
+      />
+    </div>
   )
 }

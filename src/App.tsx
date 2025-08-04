@@ -44,9 +44,16 @@ function App() {
     <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono overflow-hidden" >
       <Header />
 
-      <main className="flex h-full flex-col overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
-          <ResizablePanel defaultSize={70} minSize={30}>
+      <main className="flex h-full flex-col overflow-hidden min-h-0">
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="flex-1 overflow-hidden h-full min-h-0"
+        >
+          <ResizablePanel
+            defaultSize={70}
+            minSize={30}
+            className="h-full min-w-0"
+          >
             <Canvas />
           </ResizablePanel>
           <ResizableHandle />
@@ -54,13 +61,13 @@ function App() {
             id="controller-home"
             defaultSize={30}
             minSize={20}
-            className="flex flex-col"
-            style={{ height: controllerHeight }}
+            className="h-full flex flex-col min-h-0"
           >
             <Controller />
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
+
       <Footer />
     </div >
   );
