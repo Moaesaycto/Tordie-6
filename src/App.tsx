@@ -6,39 +6,17 @@ import {
 import Header from "@/components/main/header";
 import Footer from "@/components/main/footer";
 import Canvas from "@/Canvas";
-import { Controller } from "./components/controller/controller";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { Controller } from "@/components/controller/controller";
+import { invoke } from '@tauri-apps/api/core';
+import { useEffect, useState } from "react";
+
 
 function App() {
-  const [controllerHeight, setControllerHeight] = useState<number>(0);
+  const [projectName, setProjectName] = useState<string>("New Project")
 
-  const headerEl = useRef<HTMLElement | null>(null);
-  const footerEl = useRef<HTMLElement | null>(null);
-
-  const recalc = useCallback(() => {
-    if (!headerEl.current) headerEl.current = document.querySelector("header");
-    if (!footerEl.current) footerEl.current = document.querySelector("footer");
-
-    const headerH = headerEl.current?.getBoundingClientRect().height ?? 0;
-    const footerH = footerEl.current?.getBoundingClientRect().height ?? 0;
-
-    setControllerHeight(Math.max(window.innerHeight - headerH - footerH, 0));
-  }, []);
-
-  useLayoutEffect(() => {
-    recalc();
-
-    window.addEventListener("resize", recalc);
-
-    const ro = new ResizeObserver(recalc);
-    headerEl.current && ro.observe(headerEl.current);
-    footerEl.current && ro.observe(footerEl.current);
-
-    return () => {
-      window.removeEventListener("resize", recalc);
-      ro.disconnect();
-    };
-  }, [recalc]);
+useEffect(() => {
+  invoke("update_project_name", { newName: projectName });
+}, [projectName]);
 
   return (
     <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono overflow-hidden" >

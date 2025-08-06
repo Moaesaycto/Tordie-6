@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react'
 import { state } from '@/CanvasState'
 import { useSnapshot } from 'valtio'
 
-export default function CanvasRenderer() {
+export default function Viewport() {
   const snap = useSnapshot(state)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)

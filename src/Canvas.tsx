@@ -1,5 +1,5 @@
 import Ruler from "./temp_components/Ruler"
-import CanvasRenderer from "./CanvasRenderer"
+import Viewport from "@/components/Viewport"
 import OffsetScale from "./OffsetScale"
 import ToOriginButton from "./ToOriginButton"
 import { useViewportSize } from "@/components/hooks/useViewportSize"
@@ -32,7 +32,7 @@ const Canvas = () => {
             id="viewport-wrapper"
             ref={viewportRef}
           >
-            <CanvasRenderer />
+            <Viewport />
           </div>
           <OffsetScale />
           {corner}
