@@ -46,14 +46,14 @@ pub fn start_discord_presence() {
             let name = name_clone.lock().unwrap().clone();
 
             if let Err(e) = drpc.set_activity(|a| {
-                a.state("Doing cool stuff")
+                a.state("Development Mode")
                     .details(&name)
-                    .assets(|ass| ass.large_image("icon"))
+                    .assets(|ass| ass.large_image("icon").small_image("small-icon"))
                     .timestamps(|t| t.start(epoch_start))
             }) {
                 eprintln!("[RPC] Failed to set activity: {e}");
             }
-            
+
             thread::sleep(time::Duration::from_secs(2));
         }
     });
