@@ -1,6 +1,5 @@
-import { ValidOS, Vector2 } from '@/types';
-import React, { createContext, useContext, useEffect, useLayoutEffect, useState } from 'react';
-import Config from "@/tordie.config.json";
+import React, { createContext, useContext, useEffect, useState } from 'react'
+import { Vector2, ValidOS } from '@/types'
 
 type StatusProviderProps = {
     children: React.ReactNode
@@ -9,163 +8,105 @@ type StatusProviderProps = {
     }
 }
 
-type CanvasStateProps = {
-    documentWidth: number,
-    setDocumentWidth: (width: number) => void,
-    documentHeight: number,
-    setDocumentHeight: (height: number) => void,
-    offsetX: number,
-    setOffsetX: (offset: number) => void,
-    offsetY: number,
-    setOffsetY: (offset: number) => void,
-    rotation: number,
-    setRotation: (rotation: number) => void,
-    zoom: number,
-    setZoom: (zoom: number) => void,
-
-    cursor: CursorStateProps,
-}
-
-type CursorStateProps = {
-    viewportCursorCoords: Vector2 | null,
-    setViewportCursorCoords: (coords: Vector2 | null) => void,
-    relativeViewportCursorCoords: Vector2 | null,
-    setRelativeViewportCursorCoords: (coords: Vector2 | null) => void,
-}
-
-type ViewportStateProps = {
+type ViewportState = {
+    viewportCursorCoords: Vector2 | null
+    setViewportCursorCoords: (coords: Vector2 | null) => void
+    relativeViewportCursorCoords: Vector2 | null
+    setRelativeViewportCursorCoords: (coords: Vector2 | null) => void
+    offsetX: number
+    setOffsetX: (x: number) => void
+    offsetY: number
+    setOffsetY: (y: number) => void
+    zoom: number
+    setZoom: (z: number) => void
     viewportWidth: number;
     viewportHeight: number;
+    setViewportWidth: (width: number) => void;
+    setViewportHeight: (height: number) => void;
 }
 
-type StatusProviderState = {
+type StatusContext = {
     devMode: boolean
     setDevMode: (state: boolean) => void
-
     os: ValidOS
     setOs: (os: ValidOS) => void
-    canvas: CanvasStateProps
-    viewport: ViewportStateProps
+    viewport: ViewportState
 }
 
-const StatusProviderContext = createContext<StatusProviderState | undefined>(undefined);
+const StatusProviderContext = createContext<StatusContext | undefined>(undefined)
 
-export function StatusProvider({
-    children,
-    defaultState,
-    ...props
-}: StatusProviderProps) {
-    const [devMode, setDevMode] = useState<boolean>(
-        defaultState?.devMode ?? true // TODO: CHANGE TO FALSE
-    );
+export function StatusProvider({ children, defaultState }: StatusProviderProps) {
+    const [devMode, setDevMode] = useState(defaultState?.devMode ?? true) // TODO: Change!
     const [os, setOs] = useState<ValidOS>(null)
-    const [documentWidth, setDocumentWidth] = useState<number>(Config.canvas.defaultWidth);
-    const [documentHeight, setDocumentHeight] = useState<number>(Config.canvas.defaultHeight);
-    const [offsetX, setOffsetX] = useState<number>(Config.canvas.defaultOffsetX);
-    const [offsetY, setOffsetY] = useState<number>(Config.canvas.defaultOffsetY);
-    const [zoom, setZoom] = useState<number>(Config.canvas.defaultZoom);
-    const [rotation, setRotation] = useState<number>(Config.canvas.defaultRotation);
 
-    const [viewportCursorCoords, setViewportCursorCoords] = useState<Vector2 | null>(null);
-    const [relativeViewportCursorCoords, setRelativeViewportCursorCoords] = useState<Vector2 | null>(null);
     const [viewportWidth, setViewportWidth] = useState(0);
     const [viewportHeight, setViewportHeight] = useState(0);
 
+    const [viewportCursorCoords, setViewportCursorCoords] = useState<Vector2 | null>(null)
+    const [relativeViewportCursorCoords, setRelativeViewportCursorCoords] = useState<Vector2 | null>(null)
+
+    const [offsetX, setOffsetX] = useState(0)
+    const [offsetY, setOffsetY] = useState(0)
+    const [zoom, setZoom] = useState(1)
+
+    // Detect OS
     useEffect(() => {
-        const platform = navigator.userAgent.toLowerCase();
+        const ua = navigator.userAgent.toLowerCase()
+        let detected: ValidOS = null
+        if (ua.includes('mac')) detected = 'macos'
+        else if (ua.includes('win')) detected = 'windows'
+        else if (ua.includes('linux')) detected = 'linux'
+        if (detected !== os) setOs(detected)
+    }, [os])
 
-        let detectedOS: ValidOS = null;
-        if (platform.includes("mac")) {
-            detectedOS = "macos";
-        } else if (platform.includes("win")) {
-            detectedOS = "windows";
-        } else if (platform.includes("linux")) {
-            detectedOS = "linux";
-        }
-
-        if (detectedOS !== os) {
-            setOs(detectedOS);
-        }
-    }, [os]);
-
+    // Update relative coords
     useEffect(() => {
         if (!viewportCursorCoords) {
             setRelativeViewportCursorCoords(null)
-            return;
+            return
         }
 
-        const transform = (coords: Vector2): Vector2 => {
-            return {
-                x: (coords.x - offsetX) / zoom,
-                y: (coords.y - offsetY) / zoom,
-            };
+        const transformed = {
+            x: (viewportCursorCoords.x - offsetX) / zoom,
+            y: (viewportCursorCoords.y - offsetY) / zoom,
         }
 
-        setRelativeViewportCursorCoords(transform(viewportCursorCoords))
-
-    }, [viewportCursorCoords])
-
-    useLayoutEffect(() => {
-        const el = document.getElementById('canvasViewport');
-        if (!el) return;
-        const ro = new ResizeObserver(([entry]) => {
-            const { width, height } = entry.contentRect;
-            if (width && height) {
-                setViewportWidth(width);
-                setViewportHeight(height);
-            }
-        });
-        ro.observe(el);
-        return () => ro.disconnect();
-    }, []);
+        setRelativeViewportCursorCoords(transformed)
+    }, [viewportCursorCoords, offsetX, offsetY, zoom])
 
 
-    const defaultCanvas = {
-        documentWidth,
-        setDocumentWidth,
-        documentHeight,
-        setDocumentHeight,
-        offsetX,
-        setOffsetX,
-        offsetY,
-        setOffsetY,
-        zoom,
-        setZoom,
-        rotation,
-        setRotation,
-        cursor: {
-            viewportCursorCoords,
-            setViewportCursorCoords,
-            relativeViewportCursorCoords,
-            setRelativeViewportCursorCoords
-        },
-    };
-
-    const defaultViewport = {
-        viewportWidth,
-        viewportHeight,
-    }
-
-    const value = {
+    const value: StatusContext = {
         devMode,
         setDevMode,
         os,
         setOs,
-        canvas: defaultCanvas,
-        viewport: defaultViewport
+        viewport: {
+            viewportCursorCoords,
+            setViewportCursorCoords,
+            relativeViewportCursorCoords,
+            setRelativeViewportCursorCoords,
+            offsetX,
+            setOffsetX,
+            offsetY,
+            setOffsetY,
+            zoom,
+            setZoom,
+            viewportWidth,
+            viewportHeight,
+            setViewportWidth,
+            setViewportHeight,
+        },
     }
 
     return (
-        <StatusProviderContext.Provider {...props} value={value}>
+        <StatusProviderContext.Provider value={value}>
             {children}
         </StatusProviderContext.Provider>
     )
 }
 
-export const useStatus = () => {
-    const context = useContext(StatusProviderContext);
-    if (!context) {
-        throw new Error("useStatus must be used within a StatusProvider");
-    }
-    return context;
+export function useStatus() {
+    const context = useContext(StatusProviderContext)
+    if (!context) throw new Error('useStatus must be used within a StatusProvider')
+    return context
 }

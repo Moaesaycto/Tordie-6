@@ -5,48 +5,37 @@ import {
 } from "@/components/ui/resizable";
 import Header from "@/components/main/header";
 import Footer from "@/components/main/footer";
-import Canvas from "@/components/canvas/canvas";
-import { Controller } from "./components/controller/controller";
-import { useCallback, useLayoutEffect, useRef, useState } from "react";
+import Canvas from "@/Canvas";
+import { Controller } from "@/components/controller/controller";
+import { invoke } from '@tauri-apps/api/core';
+import { useEffect, useState } from "react";
+
+invoke("test_command");
 
 function App() {
-  const [controllerHeight, setControllerHeight] = useState<number>(0);
+  const [projectName, setProjectName] = useState<string>("Untitled Project")
 
-  const headerEl = useRef<HTMLElement | null>(null);
-  const footerEl = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    invoke("update_project_name", { newName: projectName })
+      .then(() => console.log("Command sent"))
+      .catch(err => console.error("Failed to send command", err));
+  }, [projectName]);
 
-  const recalc = useCallback(() => {
-    if (!headerEl.current) headerEl.current = document.querySelector("header");
-    if (!footerEl.current) footerEl.current = document.querySelector("footer");
-
-    const headerH = headerEl.current?.getBoundingClientRect().height ?? 0;
-    const footerH = footerEl.current?.getBoundingClientRect().height ?? 0;
-
-    setControllerHeight(Math.max(window.innerHeight - headerH - footerH, 0));
-  }, []);
-
-  useLayoutEffect(() => {
-    recalc();
-
-    window.addEventListener("resize", recalc);
-
-    const ro = new ResizeObserver(recalc);
-    headerEl.current && ro.observe(headerEl.current);
-    footerEl.current && ro.observe(footerEl.current);
-
-    return () => {
-      window.removeEventListener("resize", recalc);
-      ro.disconnect();
-    };
-  }, [recalc]);
 
   return (
     <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono overflow-hidden" >
       <Header />
 
-      <main className="flex h-full flex-col overflow-hidden">
-        <ResizablePanelGroup direction="horizontal" className="flex-1 overflow-hidden">
-          <ResizablePanel defaultSize={70} minSize={30}>
+      <main className="flex h-full flex-col overflow-hidden min-h-0">
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="flex-1 overflow-hidden h-full min-h-0"
+        >
+          <ResizablePanel
+            defaultSize={70}
+            minSize={30}
+            className="h-full"
+          >
             <Canvas />
           </ResizablePanel>
           <ResizableHandle />
@@ -54,13 +43,13 @@ function App() {
             id="controller-home"
             defaultSize={30}
             minSize={20}
-            className="flex flex-col"
-            style={{ height: controllerHeight }}
+            className="h-full flex flex-col min-h-0"
           >
             <Controller />
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
+
       <Footer />
     </div >
   );

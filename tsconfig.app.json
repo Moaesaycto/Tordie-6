@@ -33,5 +33,5 @@
   },
   "include": [
     "src"
-  ]
+, "src/components/status-provider.tsx"  ]
 }
