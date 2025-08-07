@@ -48,7 +48,7 @@ pub fn start_discord_presence() {
             if let Err(e) = drpc.set_activity(|a| {
                 a.state("Development Mode")
                     .details(&name)
-                    .assets(|ass| ass.large_image("icon").small_image("small-icon"))
+                    .assets(|ass| ass.large_image("icon").small_image("development-icon"))
                     .timestamps(|t| t.start(epoch_start))
             }) {
                 eprintln!("[RPC] Failed to set activity: {e}");

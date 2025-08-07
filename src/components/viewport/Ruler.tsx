@@ -102,7 +102,8 @@ const CanvasRuler: React.FC<RulerProps> = ({ orientation }) => {
         ctx.stroke()
         if (t.level === 'major') {
           ctx.save()
-          ctx.translate(2, t.posPx)
+          ctx.textAlign = 'center'
+          ctx.translate(MAJOR_LENGTH + 5, t.posPx)
           ctx.rotate(-Math.PI / 2)
           ctx.fillText(t.label ?? "", 0, 0)
           ctx.restore()
@@ -114,7 +115,7 @@ const CanvasRuler: React.FC<RulerProps> = ({ orientation }) => {
         ctx.stroke()
         if (t.level === 'major') {
           ctx.textAlign = 'center'
-          ctx.fillText(t.label ?? "", t.posPx, 10)
+          ctx.fillText(t.label ?? "", t.posPx, MAJOR_LENGTH + 5)
         }
       }
     }

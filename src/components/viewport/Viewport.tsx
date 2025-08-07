@@ -2,6 +2,10 @@ import React, { useRef, useEffect } from 'react'
 import { state } from '@/CanvasState'
 import { useSnapshot } from 'valtio'
 
+const MIN_ZOOM = 0.05
+const MAX_ZOOM = 50
+
+
 export default function Viewport() {
   const snap = useSnapshot(state)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -72,7 +76,8 @@ export default function Viewport() {
     const { x, y } = getCanvasPoint(e)
 
     const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
-    const newZoom = state.zoom * zoomFactor
+    const rawZoom = state.zoom * zoomFactor
+    const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, rawZoom))
 
     state.pan.x = x - ((x - state.pan.x) / state.zoom) * newZoom
     state.pan.y = y - ((y - state.pan.y) / state.zoom) * newZoom
