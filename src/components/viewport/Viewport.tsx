@@ -71,18 +71,39 @@ export default function Viewport() {
     }
   }
 
-  const onWheel = (e: React.WheelEvent) => {
-    e.preventDefault()
-    const { x, y } = getCanvasPoint(e)
+  // We must use useEffect hook for sideways scrolling
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
 
-    const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
-    const rawZoom = state.zoom * zoomFactor
-    const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, rawZoom))
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault()
 
-    state.pan.x = x - ((x - state.pan.x) / state.zoom) * newZoom
-    state.pan.y = y - ((y - state.pan.y) / state.zoom) * newZoom
-    state.zoom = newZoom
-  }
+      if (Math.abs(e.deltaX) > 1) {
+        state.pan.x -= e.deltaX
+        return
+      }
+
+      const bounds = canvas.getBoundingClientRect()
+      const x = e.clientX - bounds.left
+      const y = e.clientY - bounds.top
+
+      const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1
+      const rawZoom = state.zoom * zoomFactor
+      const newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, rawZoom))
+
+      state.pan.x = x - ((x - state.pan.x) / state.zoom) * newZoom
+      state.pan.y = y - ((y - state.pan.y) / state.zoom) * newZoom
+      state.zoom = newZoom
+    }
+
+    canvas.addEventListener('wheel', handleWheel, { passive: false })
+
+    return () => {
+      canvas.removeEventListener('wheel', handleWheel)
+    }
+  }, [])
+
 
   const onMouseDown = (e: React.MouseEvent) => {
     const { x, y } = getCanvasPoint(e)
@@ -134,7 +155,6 @@ export default function Viewport() {
     <div ref={wrapperRef} className="flex flex-col min-w-0 min-h-0 w-full h-full">
       <canvas
         ref={canvasRef}
-        onWheel={onWheel}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}

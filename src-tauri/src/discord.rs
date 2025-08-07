@@ -5,10 +5,10 @@ use discord_rpc_client::Client as RpcClient;
 
 lazy_static! {
     pub static ref CURRENT_PROJECT_NAME: Arc<Mutex<String>> =
-        Arc::new(Mutex::new("Untitled Project".into()));
+        Arc::new(Mutex::new("Loading project...".into()));
 }
 
-pub fn update_project_name(new_name: String) {
+pub fn discord_update_project_name(new_name: String) {
     let mut name = CURRENT_PROJECT_NAME.lock().unwrap();
     *name = new_name.clone();
     println!("[RPC] Project name updated: {new_name}");
@@ -54,7 +54,7 @@ pub fn start_discord_presence() {
                 eprintln!("[RPC] Failed to set activity: {e}");
             }
 
-            thread::sleep(time::Duration::from_secs(2));
+            thread::sleep(time::Duration::from_secs(10));
         }
     });
 }

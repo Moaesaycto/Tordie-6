@@ -10,13 +10,17 @@ import { Controller } from "@/components/controller/controller";
 import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from "react";
 
+invoke("test_command");
 
 function App() {
-  const [projectName, setProjectName] = useState<string>("New Project")
+  const [projectName, setProjectName] = useState<string>("Untitled Project")
 
-useEffect(() => {
-  invoke("update_project_name", { newName: projectName });
-}, [projectName]);
+  useEffect(() => {
+    invoke("update_project_name", { newName: projectName })
+      .then(() => console.log("Command sent"))
+      .catch(err => console.error("Failed to send command", err));
+  }, [projectName]);
+
 
   return (
     <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono overflow-hidden" >
