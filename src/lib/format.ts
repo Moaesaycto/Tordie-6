@@ -48,6 +48,7 @@ export const formatLabel = (num: number) => {
     return Number(str).toString();
 };
 
-export function formatRounded(num: number, decimalPlaces: number = 3): string {
-    return num.toFixed(decimalPlaces);
+export function formatRounded(num: number | null | undefined, decimalPlaces: number = 3): string {
+  if (typeof num !== 'number' || isNaN(num)) return "-";
+  return num.toFixed(decimalPlaces);
 }

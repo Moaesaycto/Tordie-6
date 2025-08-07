@@ -1,15 +1,35 @@
 import React, { useRef, useEffect } from 'react'
 import { state } from '@/CanvasState'
 import { useSnapshot } from 'valtio'
+import { useStatus } from '../status-provider'
 
 const MIN_ZOOM = 0.05
 const MAX_ZOOM = 50
+
 
 
 export default function Viewport() {
   const snap = useSnapshot(state)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const wrapperRef = useRef<HTMLDivElement>(null)
+
+  const {
+    viewport: {
+      setViewportCursorCoords,
+      setZoom,
+      setOffsetX,
+      setOffsetY,
+      setViewportWidth,
+      setViewportHeight,
+    }
+  } = useStatus();
+
+  useEffect(() => {
+    setZoom(snap.zoom);
+    setOffsetX(snap.pan.x);
+    setOffsetY(snap.pan.y);
+  }, [snap.zoom, snap.pan.x, snap.pan.y]);
+
 
   // Resize canvas to match container
   useEffect(() => {
@@ -24,6 +44,9 @@ export default function Viewport() {
       canvas.height = height * dpr
       canvas.style.width = `${width}px`
       canvas.style.height = `${height}px`
+
+      setViewportWidth(width)
+      setViewportHeight(height)
     }
 
     const observer = new ResizeObserver(resize)
@@ -126,6 +149,9 @@ export default function Viewport() {
   }
 
   const onMouseMove = (e: React.MouseEvent) => {
+    const { x, y } = getCanvasPoint(e);
+    setViewportCursorCoords({ x, y });
+
     if (state.middlePanning) {
       const dx = e.clientX - state.lastMouse.x
       const dy = e.clientY - state.lastMouse.y
@@ -151,6 +177,7 @@ export default function Viewport() {
     if (state.dragging) state.dragging = false
   }
 
+
   return (
     <div ref={wrapperRef} className="flex flex-col min-w-0 min-h-0 w-full h-full">
       <canvas
@@ -158,6 +185,7 @@ export default function Viewport() {
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}
         onMouseUp={onMouseUp}
+        onMouseLeave={() => setViewportCursorCoords(null)}
         style={{
           display: 'block',
           background: '#f8f8f8',

@@ -3,9 +3,13 @@ import { Separator } from "@/components/ui/separator";
 import { CoordsBlock } from "@/components/main/helpers";
 
 const CoordsDisplay = () => {
-    const { cursor } = useStatus().canvas;
-    const px = cursor.viewportCursorCoords ?? { x: null, y: null };
-    const rel = cursor.relativeViewportCursorCoords ?? { x: null, y: null };
+    const {
+        viewportCursorCoords,
+        relativeViewportCursorCoords,
+    } = useStatus().viewport;
+
+    const px = viewportCursorCoords ?? { x: null, y: null };
+    const rel = relativeViewportCursorCoords ?? { x: null, y: null };
 
     return (
         <div className="flex flex-row gap-2 items-start">
