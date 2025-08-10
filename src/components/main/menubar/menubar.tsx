@@ -5,10 +5,11 @@ import {
 } from "@/components/ui/menubar"
 
 import { useTheme } from "@/components/theme-provider"
-import { useStatus } from "@/components/status-provider"
+import { useApp } from "@/components/app-provider"
 import { TextSize, Theme } from "@/types"
 import { formatKeyHint, useKeyHint } from "@/lib/format"
 import { CompactCheckboxItem, CompactContent, CompactItem, compactMenubarStyles, CompactRadioGroup, CompactSeparator, CompactSubContent, CompactSubTrigger, CompactTrigger } from "./compact-menubar-items"
+import { useExportLayerSVG } from "@/components/hooks/document/useExportSVG"
 
 export function HeaderMenubar() {
     return (
@@ -22,6 +23,7 @@ export function HeaderMenubar() {
 
 const FileMenu = () => {
     const modKey = useKeyHint()
+    const exportLayerSVG = useExportLayerSVG();
 
     return (
         <MenubarMenu>
@@ -31,6 +33,12 @@ const FileMenu = () => {
                     Example
                 </CompactItem>
                 <CompactSeparator />
+                <CompactItem
+                    shortcut={formatKeyHint([modKey, "t"])}
+                    onClick={exportLayerSVG}
+                >
+                    Export SVG
+                </CompactItem>
                 <CompactItem disabled>Disabled</CompactItem>
             </CompactContent>
         </MenubarMenu>
@@ -39,7 +47,7 @@ const FileMenu = () => {
 
 const ViewMenu = () => {
     const { theme, setTheme, textSize, setTextSize } = useTheme()
-    const { devMode, setDevMode } = useStatus()
+    const { devMode, setDevMode } = useApp()
 
     return (
         <MenubarMenu>

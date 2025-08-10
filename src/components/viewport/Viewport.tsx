@@ -1,43 +1,17 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useCallback } from 'react'
 import { useSnapshot } from 'valtio'
 import { Stage, Layer, Circle } from 'react-konva'
 import { state } from '@/CanvasState'
-import { useStatus } from '../status-provider'
+import { useApp } from '../app-provider'
 import { useViewportControls } from '@/components/hooks/viewport/useViewportControls'
 import Konva from 'konva'
+import { useDocument } from '@/components/document-provider'
 
 export default function Viewport() {
   const snap = useSnapshot(state)
   const wrapperRef = useRef<HTMLDivElement>(null)
   const stageRef = useRef<Konva.Stage>(null)
-
-  // inside your component (renderer window)
-  const exportLayerSVG = async () => {
-    const stage = stageRef.current!;
-    const layer = stage.getLayers()[0];
-
-    // tight bbox incl. invisible nodes, ignore shadows to avoid huge rects
-    const r = layer.getClientRect({ skipStroke: false, skipShadow: true });
-    const w = Math.ceil(r.width), h = Math.ceil(r.height);
-
-    // build a temporary off-DOM stage with the layer offset so (0,0) = bbox min
-    const div = document.createElement('div');
-    const tmp = new Konva.Stage({ container: div, width: w, height: h });
-    const cloned = layer.clone({ x: -r.x, y: -r.y });
-    tmp.add(cloned); tmp.draw();
-
-    // dynamic import avoids any bundler quirk
-    const { exportStageSVG } = await import('react-konva-to-svg');
-    const svg = await exportStageSVG(tmp, false) as string;
-
-    // download
-    const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
-    const a = Object.assign(document.createElement('a'), {
-      href: URL.createObjectURL(blob),
-      download: 'layer.svg',
-    });
-    document.body.appendChild(a); a.click(); a.remove();
-  };
+  const { setStage } = useDocument();
 
 
   const {
@@ -46,7 +20,18 @@ export default function Viewport() {
       setViewportWidth,
       setViewportHeight,
     },
-  } = useStatus()
+  } = useApp()
+
+  // Preferred: ref-callback fires when Stage is created/destroyed
+  const handleStageRef = useCallback((node: Konva.Stage | null) => {
+    stageRef.current = node;
+    setStage(node);
+  }, [setStage]);
+
+  // Fallback: after mount (covers hot-reloads)
+  useEffect(() => {
+    if (stageRef.current) setStage(stageRef.current);
+  }, [setStage]);
 
   useViewportControls(stageRef, setViewportCursorCoords)
 
@@ -71,27 +56,8 @@ export default function Viewport() {
 
   return (
     <div ref={wrapperRef} className="flex flex-col min-w-0 min-h-0 w-full h-full">
-      {/* Temporary test button */}
-      <button
-        onClick={exportLayerSVG}
-        style={{
-          position: 'absolute',
-          top: 10,
-          left: 10,
-          zIndex: 1000,
-          padding: '4px 8px',
-          background: '#333',
-          color: '#fff',
-          border: 'none',
-          borderRadius: 4,
-          cursor: 'pointer',
-        }}
-      >
-        Export SVG
-      </button>
-
       <Stage
-        ref={stageRef}
+        ref={handleStageRef}
         width={snap.viewport.width}
         height={snap.viewport.height}
         scaleX={snap.zoom}

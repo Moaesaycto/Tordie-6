@@ -1,4 +1,4 @@
-import { useStatus } from "@/components/status-provider"
+import { useApp } from "@/components/app-provider"
 import { useTheme } from "@/components/theme-provider"
 import { CommandKey } from "@/types"
 
@@ -23,7 +23,7 @@ const inputHeights: Record<string, string> = {
 };
 
 export function useKeyHint() {
-    const { os } = useStatus()
+    const { os } = useApp()
     return os === "macos" ? "cmd" : "ctrl"
 }
 

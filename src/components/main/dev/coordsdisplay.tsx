@@ -1,11 +1,11 @@
-import { useStatus } from "@/components/status-provider";
+import { useApp } from "@/components/app-provider";
 import { Separator } from "@/components/ui/separator";
 import { CoordsBlock } from "@/components/main/helpers";
 import { useSnapshot } from "valtio";
 import { state } from "@/CanvasState";
 
 const CoordsDisplay = () => {
-  const { viewportCursorCoords } = useStatus().viewport;
+  const { viewportCursorCoords } = useApp().viewport;
   const snap = useSnapshot(state);
 
   const px = viewportCursorCoords ?? { x: null, y: null };
