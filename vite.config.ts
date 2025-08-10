@@ -22,6 +22,7 @@ export default defineConfig({
       },
     }),
   ],
+  optimizeDeps: { include: ['react-konva-to-svg'] },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

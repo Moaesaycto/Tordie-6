@@ -1,4 +1,3 @@
-// lib/components/compact-menubar.tsx
 import React from "react"
 import {
     MenubarTrigger,
