@@ -9,7 +9,7 @@ import { useApp } from "@/components/app-provider"
 import { TextSize, Theme } from "@/types"
 import { formatKeyHint, useKeyHint } from "@/lib/format"
 import { CompactCheckboxItem, CompactContent, CompactItem, compactMenubarStyles, CompactRadioGroup, CompactSeparator, CompactSubContent, CompactSubTrigger, CompactTrigger } from "./compact-menubar-items"
-import { useExportLayerSVG } from "@/components/hooks/document/useExportSVG"
+import { useExportLayerSVG } from "@/components/hooks/document/Export"
 
 export function HeaderMenubar() {
     return (
@@ -37,7 +37,7 @@ const FileMenu = () => {
                     shortcut={formatKeyHint([modKey, "t"])}
                     onClick={exportLayerSVG}
                 >
-                    Export SVG
+                    Export
                 </CompactItem>
                 <CompactItem disabled>Disabled</CompactItem>
             </CompactContent>
