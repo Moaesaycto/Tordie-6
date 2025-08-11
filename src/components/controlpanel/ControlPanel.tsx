@@ -1,9 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import DocumentController from "@/components/controller/documentcontroller"
+import DocumentController from "./DocumentPanel"
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { useRef, useEffect, useState } from "react"
 
-export function Controller() {
+export function ControlPanel() {
     const wrapperRef = useRef<HTMLDivElement>(null)
     const headerRef = useRef<HTMLDivElement>(null)
     const [scrollHeight, setScrollHeight] = useState<number>(0)

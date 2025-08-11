@@ -17,5 +17,8 @@
         "minorDivisions": 2,
         "subMinorDivisions": 5,
         "thickness": 20
+    },
+    "document": {
+        "default_name": "Untitled Project"
     }
 }
