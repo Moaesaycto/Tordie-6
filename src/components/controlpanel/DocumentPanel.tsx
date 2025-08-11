@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useDocument } from "@/components/document-provider";
 import { useEffect, useState } from "react";
 
-const DocumentController = () => {
+const DocumentPanel = () => {
   const fontSize = useFontSize();
   const { title, setTitle } = useDocument();
   const [draft, setDraft] = useState(title);
@@ -35,4 +35,4 @@ const DocumentController = () => {
   );
 };
 
-export default DocumentController;
+export default DocumentPanel;

@@ -1,7 +1,7 @@
 import { useFontSize } from "@/lib/format";
 import { Separator } from "@/components/ui/separator";
 
-const ExportController = () => {
+const ExportPanel = () => {
     const fontSize = useFontSize();
 
     return (
@@ -12,4 +12,4 @@ const ExportController = () => {
     );
 };
 
-export default ExportController;
+export default ExportPanel;

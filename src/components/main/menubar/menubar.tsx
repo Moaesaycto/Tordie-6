@@ -9,7 +9,8 @@ import { useApp } from "@/components/app-provider"
 import { TextSize, Theme } from "@/types"
 import { formatKeyHint, useKeyHint } from "@/lib/format"
 import { CompactCheckboxItem, CompactContent, CompactItem, compactMenubarStyles, CompactRadioGroup, CompactSeparator, CompactSubContent, CompactSubTrigger, CompactTrigger } from "./compact-menubar-items"
-import { useExportLayerSVG } from "@/components/hooks/document/Export"
+import { useExportLayerSVG } from "@/components/hooks/document/ExportSVG"
+import { useExportLayerRaster } from "@/components/hooks/document/ExportRaster"
 
 export function HeaderMenubar() {
     return (
@@ -24,6 +25,11 @@ export function HeaderMenubar() {
 const FileMenu = () => {
     const modKey = useKeyHint()
     const exportLayerSVG = useExportLayerSVG();
+    const exportPng = useExportLayerRaster();
+    const exportJpg = useExportLayerRaster();
+/* 
+<Button onClick={() => exportPng('png', { pixelRatio: 2 })}>Export PNG</Button> */
+
 
     return (
         <MenubarMenu>
@@ -35,7 +41,7 @@ const FileMenu = () => {
                 <CompactSeparator />
                 <CompactItem
                     shortcut={formatKeyHint([modKey, "t"])}
-                    onClick={exportLayerSVG}
+                    onClick={() => exportJpg('png', { pixelRatio: 2, quality: 0.9 })}
                 >
                     Export
                 </CompactItem>
