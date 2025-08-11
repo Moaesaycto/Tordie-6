@@ -1,8 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useRef, useEffect, useState, type ComponentType } from "react";
+import { useRef, useEffect, useState, type ComponentType, ReactNode } from "react";
 import { useAppState } from "@/components/state-provider";
 import type { Panel } from "@/types/state";
+import { useFontSize } from "@/lib/format";
 
 import DocumentController from "./DocumentPanel";
 import ExportPanel from "./ExportPanel";
@@ -53,11 +54,11 @@ export function ControlPanel() {
         </div>
 
         <ScrollArea className="w-full" style={{ height: scrollHeight }}>
-          <div className="p-2">
+          <div className="p-2 h-full">        {/* add h-full */}
             {(Object.keys(PANELS) as Panel[]).map((id) => {
               const C = PANELS[id].component;
               return (
-                <TabsContent key={id} value={id}>
+                <TabsContent key={id} value={id} className="h-full"> {/* add h-full */}
                   <C />
                 </TabsContent>
               );
@@ -69,3 +70,16 @@ export function ControlPanel() {
     </div>
   );
 }
+
+type PanelPageProps = {
+  children: ReactNode;
+}
+
+export const PanelPage = ({ children }: PanelPageProps) => {
+  const fontSize = useFontSize();
+  return (
+    <div className={`flex h-full min-h-0 flex-col w-full space-y-1 ${fontSize} gap-4`}>
+      {children}
+    </div>
+  );
+};
