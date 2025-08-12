@@ -29,9 +29,13 @@
       "@/*": [
         "./src/*"
       ],
+      "@domain/*": [
+        "./src/domain/*"
+      ],
     }
   },
   "include": [
-    "src"
-, "src/components/app-provider.tsx"  ]
+    "src",
+    "src/components/app-provider.tsx"
+  ]
 }

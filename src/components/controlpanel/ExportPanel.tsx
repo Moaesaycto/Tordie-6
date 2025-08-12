@@ -178,7 +178,7 @@ const ExportPanel = () => {
     <PanelPage>
       <div>
         <span className="block mb-2 text-sm font-medium">Export Options</span>
-        <div className="flex flex-col gap-2 w-full rounded border border-neutral-700/60 bg-neutral-800/40 p-3">
+        <div className="flex flex-col gap-2 w-full rounded border border-neutral-700/60 bg-neutral-500/40 p-3">
           <div className="flex items-center gap-3">
             <span>Scale</span>
             <Input

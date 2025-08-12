@@ -5,7 +5,7 @@ import {
 } from "@/components/ui/resizable";
 import Header from "@/components/main/header";
 import Footer from "@/components/main/footer";
-import Canvas from "@/Canvas";
+import Canvas from "@/components/canvas/Canvas";
 import { ControlPanel } from "@/components/controlpanel/ControlPanel";
 import { invoke } from '@tauri-apps/api/core';
 

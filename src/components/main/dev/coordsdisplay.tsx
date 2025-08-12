@@ -2,7 +2,7 @@ import { useApp } from "@/components/app-provider";
 import { Separator } from "@/components/ui/separator";
 import { CoordsBlock } from "@/components/main/helpers";
 import { useSnapshot } from "valtio";
-import { state } from "@/CanvasState";
+import { state } from "@/components/canvas/CanvasState";
 
 const CoordsDisplay = () => {
   const { viewportCursorCoords } = useApp().viewport;

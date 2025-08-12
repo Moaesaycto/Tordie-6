@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { state } from '@/CanvasState'
+import { state } from '@/components/canvas/CanvasState'
 
 export function useViewportSize(ref: React.RefObject<HTMLElement | null>) {
   useEffect(() => {

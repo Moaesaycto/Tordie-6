@@ -1,5 +1,5 @@
 import { HomeIcon } from 'lucide-react'
-import { state } from '@/CanvasState'
+import { state } from '@/components/canvas/CanvasState'
 import Config from '@/tordie.config.json'
 
 const ToOriginButton = () => {

@@ -1,6 +1,6 @@
 // useViewportControls.ts
 import { useEffect } from 'react'
-import { state } from '@/CanvasState'
+import { state } from '@/components/canvas/CanvasState'
 import { Vector2 } from '@/types'
 import Konva from 'konva'
 

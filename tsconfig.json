@@ -13,8 +13,13 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@domain/*": [
+        "./src/domain/*"
       ]
     },
-    "types": ["vite/client"]
+    "types": [
+      "vite/client"
+    ]
   },
 }

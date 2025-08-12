@@ -1,7 +1,7 @@
 import { useRef, useEffect, useCallback } from 'react'
 import { useSnapshot } from 'valtio'
 import { Stage, Layer, Circle } from 'react-konva'
-import { state } from '@/CanvasState'
+import { state } from '@/components/canvas/CanvasState'
 import { useApp } from '../app-provider'
 import { useViewportControls } from '@/components/hooks/viewport/useViewportControls'
 import Konva from 'konva'

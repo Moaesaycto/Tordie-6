@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { useSnapshot } from 'valtio'
-import { state } from '@/CanvasState'
+import { state } from '@/components/canvas/CanvasState'
 import { generateTicks } from '@/lib/ticks'
 import { useTheme } from '@/components/theme-provider'
 
