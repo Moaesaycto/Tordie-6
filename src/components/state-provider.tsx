@@ -1,47 +1,29 @@
+import { createContext, useContext, useState, type Dispatch, type SetStateAction } from "react";
 import { State } from "@/types/state";
-import { createContext, useContext, useState } from "react";
-
-type StateProviderProps = {
-    children: React.ReactNode;
-}
 
 type StateProviderState = {
-    currentState: State;
-    setCurrentState: (state: State) => void;
-}
+  currentState: State;
+  setCurrentState: Dispatch<SetStateAction<State>>;
+};
 
 const initialState: StateProviderState = {
-    currentState: {
-        panelState: 'document',
-        mode: 'select',
-    },
-    setCurrentState: () => { },
-}
+  currentState: { panelState: "document", mode: "select" },
+  setCurrentState: () => {},
+};
 
 const StateProviderContext = createContext<StateProviderState>(initialState);
 
-export function StateProvider({
-    children
-}: StateProviderProps) {
-    const [currentState, setCurrentState] = useState<State>(initialState.currentState);
-
-    const value = {
-        currentState,
-        setCurrentState,
-    }
-
-    return (
-        <StateProviderContext.Provider value={value}>
-            {children}
-        </StateProviderContext.Provider>
-    )
+export function StateProvider({ children }: { children: React.ReactNode }) {
+  const [currentState, setCurrentState] = useState<State>(initialState.currentState);
+  return (
+    <StateProviderContext.Provider value={{ currentState, setCurrentState }}>
+      {children}
+    </StateProviderContext.Provider>
+  );
 }
 
 export const useAppState = () => {
-    const context = useContext(StateProviderContext)
-
-    if (context == undefined)
-        throw new Error("useAppState must be used within a StateProvider")
-
-    return context;
-}
+  const ctx = useContext(StateProviderContext);
+  if (!ctx) throw new Error("useAppState must be used within a StateProvider");
+  return ctx;
+};
