@@ -13,5 +13,6 @@ export const state = proxy({
   document: {
     width: 1000,
     height: 1000
-  }
+  },
+  mode: 'select',
 })

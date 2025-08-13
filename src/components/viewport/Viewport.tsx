@@ -1,58 +1,60 @@
-import { useRef, useEffect, useCallback } from 'react'
-import { useSnapshot } from 'valtio'
-import { Stage, Layer, Circle } from 'react-konva'
-import { state } from '@/components/canvas/CanvasState'
-import { useApp } from '../app-provider'
-import { useViewportControls } from '@/components/hooks/viewport/useViewportControls'
-import Konva from 'konva'
-import { useDocument } from '@/components/document-provider'
+import { useRef, useEffect, useCallback } from 'react';
+import { useSnapshot } from 'valtio';
+import { Stage, Layer, Circle, Rect, Transformer } from 'react-konva';
+import Konva from 'konva';
+import { state } from '@/components/canvas/CanvasState';
+import { useApp } from '../app-provider';
+import { useViewportControls } from '@/components/hooks/viewport/useViewportControls';
+import { useDocument } from '@/components/document-provider';
+import { useSetMode } from '@/tools/setMode'; // <-- your hook
 
 export default function Viewport() {
-  const snap = useSnapshot(state)
-  const wrapperRef = useRef<HTMLDivElement>(null)
-  const stageRef = useRef<Konva.Stage>(null)
+  const snap = useSnapshot(state);
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<Konva.Stage>(null);
+  const mainLayerRef = useRef<Konva.Layer>(null);
+  const selRef = useRef<Konva.Rect>(null);
+  const trRef = useRef<Konva.Transformer>(null);
+
   const { setStage } = useDocument();
 
-
   const {
-    viewport: {
-      setViewportCursorCoords,
-      setViewportWidth,
-      setViewportHeight,
-    },
-  } = useApp()
+    viewport: { setViewportCursorCoords, setViewportWidth, setViewportHeight },
+  } = useApp();
 
-  // Preferred: ref-callback fires when Stage is created/destroyed
   const handleStageRef = useCallback((node: Konva.Stage | null) => {
-    stageRef.current = node;
+    stageRef.current = node ?? null;
     setStage(node);
   }, [setStage]);
 
-  // Fallback: after mount (covers hot-reloads)
   useEffect(() => {
     if (stageRef.current) setStage(stageRef.current);
   }, [setStage]);
 
-  useViewportControls(stageRef, setViewportCursorCoords)
+  useViewportControls(stageRef, setViewportCursorCoords);
 
   useEffect(() => {
     const resize = () => {
-      const wrapper = wrapperRef.current
-      if (!wrapper) return
+      const wrapper = wrapperRef.current;
+      if (!wrapper) return;
+      const { width, height } = wrapper.getBoundingClientRect();
+      setViewportWidth(width);
+      setViewportHeight(height);
+      state.viewport.width = width;
+      state.viewport.height = height;
+    };
+    const observer = new ResizeObserver(resize);
+    if (wrapperRef.current) observer.observe(wrapperRef.current);
+    resize();
+    return () => observer.disconnect();
+  }, [setViewportWidth, setViewportHeight]);
 
-      const { width, height } = wrapper.getBoundingClientRect()
-      setViewportWidth(width)
-      setViewportHeight(height)
-      state.viewport.width = width
-      state.viewport.height = height
-    }
-
-    const observer = new ResizeObserver(resize)
-    if (wrapperRef.current) observer.observe(wrapperRef.current)
-    resize()
-
-    return () => observer.disconnect()
-  }, [setViewportWidth, setViewportHeight])
+  useSetMode(snap.mode, {
+    layerRef: mainLayerRef,
+    selRef,
+    trRef,
+  });
 
   return (
     <div ref={wrapperRef} className="flex flex-col min-w-0 min-h-0 w-full h-full">
@@ -71,16 +73,17 @@ export default function Viewport() {
           display: 'block',
         }}
       >
-        <Layer>
+        <Layer ref={mainLayerRef}>
           <Circle
+            name="selectable"
             x={snap.circle.x}
             y={snap.circle.y}
             radius={20}
             fill="tomato"
             draggable
             onDragMove={(e) => {
-              state.circle.x = e.target.x()
-              state.circle.y = e.target.y()
+              state.circle.x = e.target.x();
+              state.circle.y = e.target.y();
             }}
             onMouseEnter={(e) => {
               const stage = e.target.getStage();
@@ -96,8 +99,19 @@ export default function Viewport() {
             }}
           />
         </Layer>
+
+        <Layer listening={false}>
+          <Rect
+            ref={selRef}
+            visible={false}
+            fill="rgba(0,120,255,0.15)"
+            stroke="rgba(0,120,255,1)"
+          />
+        </Layer>
+        <Layer>
+          <Transformer ref={trRef as any} ignoreStroke rotateEnabled={false} />
+        </Layer>
       </Stage>
     </div>
   );
-
 }

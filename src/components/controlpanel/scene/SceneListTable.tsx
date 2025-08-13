@@ -80,10 +80,10 @@ function Node({ node, style, dragHandle }: NodeRendererProps<SceneItemLabel>) {
     >
       <div
         className={`flex items-center gap-2 ${visible ? "" : "opacity-30"} ${node.level ? "border-l-2 pl-2" : "pl-1"}`}
-        style={{ marginLeft: node.level * 10 }}
+        // style={{ marginLeft: node.level * 0 }}
       >
         <Icon style={{ color: entry.color }} size={18} aria-hidden />
-        <span className="truncate">{node.data.name}</span>
+        <span className="truncate text-xs">{node.data.name}</span>
       </div>
 
       <div className="flex items-center gap-1 p-1 opacity-70">
