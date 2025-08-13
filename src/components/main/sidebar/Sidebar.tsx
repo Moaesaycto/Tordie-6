@@ -1,4 +1,3 @@
-// Sidebar.tsx
 import SelectMode from "@/assets/buttons/select-mode.svg?react";
 import { useAppState } from "@/components/state-provider";
 import { useTheme } from "@/components/theme-provider";
@@ -9,7 +8,6 @@ const Sidebar = () => {
   return (
     <div className="flex flex-col items-center w-11 h-full px-1 py-2">
       <SelectModeButton />
-      {/* Add more mode buttons here */}
     </div>
   );
 };

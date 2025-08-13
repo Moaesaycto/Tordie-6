@@ -1,4 +1,3 @@
-// ScenePanel.tsx
 import { useMemo } from "react";
 import { PanelPage } from "./ControlPanel";
 import { useScene } from "@/components/scene-provider";
