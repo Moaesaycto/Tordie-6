@@ -9,7 +9,7 @@ const RULER_SIZE = 20
 const SCROLL_SIZE = 17
 
 const Canvas = () => {
-  const corner = <div className="bg-neutral-500 border-3 border-neutral-600" />
+  const corner = <div className="bg-accent" />
   const viewportRef = useRef<HTMLDivElement>(null!)
   useViewportSize(viewportRef)
 
