@@ -1,10 +1,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use tauri::Manager;
 use dotenvy::dotenv;
+use tauri::Manager;
 
 mod discord;
-use discord::{start_discord_presence, discord_update_project_name};
+use discord::{discord_update_project_name, start_discord_presence};
 
 #[tauri::command]
 fn update_project_name(new_name: String) {
@@ -21,10 +21,9 @@ fn main() {
     println!("[App] Launching Tauri app...");
 
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![
-            update_project_name,
-            test_command,
-        ])
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_dialog::init())
+        .invoke_handler(tauri::generate_handler![update_project_name, test_command,])
         .setup(|app| {
             println!("[App] Running setup...");
             start_discord_presence();

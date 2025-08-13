@@ -1,0 +1,29 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "export",
+    "windows": [
+        "*"
+    ],
+    "permissions": [
+        "dialog:allow-save",
+        "fs:allow-write-file",
+        "fs:allow-write-text-file",
+        {
+            "identifier": "fs:scope",
+            "allow": [
+                {
+                    "path": "$HOME/**/*"
+                },
+                {
+                    "path": "$DESKTOP/**/*"
+                },
+                {
+                    "path": "$DOCUMENT/**/*"
+                },
+                {
+                    "path": "$DOWNLOAD/**/*"
+                }
+            ]
+        }
+    ]
+}

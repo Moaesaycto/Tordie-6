@@ -5,28 +5,21 @@ import {
 } from "@/components/ui/resizable";
 import Header from "@/components/main/header";
 import Footer from "@/components/main/footer";
-import Canvas from "@/Canvas";
-import { Controller } from "@/components/controller/controller";
+import Canvas from "@/components/canvas/Canvas";
+import { ControlPanel } from "@/components/controlpanel/ControlPanel";
 import { invoke } from '@tauri-apps/api/core';
-import { useEffect, useState } from "react";
+import Sidebar from "@/components/main/sidebar/Sidebar";
 
 invoke("test_command");
 
 function App() {
-  const [projectName, setProjectName] = useState<string>("Untitled Project")
-
-  useEffect(() => {
-    invoke("update_project_name", { newName: projectName })
-      .then(() => console.log("Command sent"))
-      .catch(err => console.error("Failed to send command", err));
-  }, [projectName]);
-
 
   return (
     <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono overflow-hidden" >
       <Header />
 
-      <main className="flex h-full flex-col overflow-hidden min-h-0">
+      <main className="flex h-full flex-row overflow-hidden min-h-0">
+        <Sidebar />
         <ResizablePanelGroup
           direction="horizontal"
           className="flex-1 overflow-hidden h-full min-h-0"
@@ -45,11 +38,10 @@ function App() {
             minSize={20}
             className="h-full flex flex-col min-h-0"
           >
-            <Controller />
+            <ControlPanel />
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
-
       <Footer />
     </div >
   );

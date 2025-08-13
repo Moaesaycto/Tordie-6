@@ -1,5 +1,4 @@
-import { useStatus } from "@/components/status-provider";
-
+import { useApp } from "@/components/app-provider";
 import AppleIcon from '@/assets/icons/os/apple-icon.svg?react';
 import WindowsIcon from '@/assets/icons/os/windows-icon.svg?react';
 import LinuxIcon from '@/assets/icons/os/linux-icon.svg?react';
@@ -13,7 +12,7 @@ const OSIcons: Record<string, React.ElementType> = {
 };
 
 const StatusDisplay = () => {
-    const { os } = useStatus();
+    const { os } = useApp();
     const { resolvedTheme } = useTheme();
 
     const Icon = OSIcons[os as string] || OtherIcon;

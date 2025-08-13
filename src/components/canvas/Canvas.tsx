@@ -1,8 +1,8 @@
-import Ruler from "./components/viewport/Ruler"
+import Ruler from "@/components/viewport/Ruler"
 import Viewport from "@/components/viewport/Viewport"
-import OffsetScale from "./components/viewport/OffsetScale"
-import ToOriginButton from "./ToOriginButton"
-import { useViewportSize } from "@/components/hooks/useViewportSize"
+import OffsetScale from "@/components/viewport/OffsetScale"
+import ToOriginButton from "@/components/viewport/ToOriginButton"
+import { useViewportSize } from "@/components/hooks/viewport/useViewportSize"
 import { useRef } from "react"
 
 const RULER_SIZE = 20

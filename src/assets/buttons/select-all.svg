@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="85mm"
+   height="85mm"
+   viewBox="0 0 85 85"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   sodipodi:docname="select-all.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:document-units="mm"
+     showgrid="true"
+     inkscape:zoom="1.0307169"
+     inkscape:cx="164.44865"
+     inkscape:cy="242.06453"
+     inkscape:window-width="1350"
+     inkscape:window-height="1237"
+     inkscape:window-x="1816"
+     inkscape:window-y="67"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1">
+    <inkscape:grid
+       id="grid1"
+       units="mm"
+       originx="-27.499999"
+       originy="-42.499998"
+       spacingx="0.99999998"
+       spacingy="1"
+       empcolor="#0099e5"
+       empopacity="0.30196078"
+       color="#0099e5"
+       opacity="0.14901961"
+       empspacing="5"
+       dotted="false"
+       gridanglex="30"
+       gridanglez="30"
+       visible="true" />
+  </sodipodi:namedview>
+  <defs
+     id="defs1" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-27.5,-42.5)">
+    <rect
+       style="fill:none;stroke:currentColor;stroke-width:5;stroke-linecap:square;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:15, 15;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+       id="rect1"
+       width="80"
+       height="80"
+       x="30"
+       y="45"
+       ry="0" />
+    <path
+       id="rect2"
+       style="fill:currentColor;fill-opacity:1;stroke:none;stroke-width:1.3895;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:16.674, 16.674;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+       d="M 37.500037,83.911157 V 115.00022 H 90.000191 V 89.327881 a 19.999998,19.999998 0 0 1 -5.000211,0.67231 19.999998,19.999998 0 0 1 -14.300936,-6.089034 z" />
+    <circle
+       style="fill:currentColor;fill-opacity:1;stroke:none;stroke-width:1.57662;stroke-linecap:square;stroke-linejoin:round;stroke-dasharray:18.9194, 18.9194;stroke-dashoffset:0;stroke-opacity:1;paint-order:stroke markers fill"
+       id="path2"
+       cx="85.672119"
+       cy="70"
+       r="15.672116" />
+  </g>
+</svg>

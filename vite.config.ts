@@ -6,25 +6,21 @@ import svgr from 'vite-plugin-svgr'
 
 export default defineConfig({
   plugins: [
-    react(),
-    tailwindcss(),
     svgr({
       svgrOptions: {
+        exportType: "default",          // <- change this
         svgo: true,
-        svgoConfig: {
-          plugins: [
-            {
-              name: 'removeAttrs',
-              params: { attrs: '(fill)' },
-            },
-          ],
-        },
+        svgoConfig: { plugins: [{ name: "removeAttrs", params: { attrs: "(fill)" } }] },
       },
     }),
+    react(),
+    tailwindcss(),
   ],
+  optimizeDeps: { include: ['react-konva-to-svg'] },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"),
+      '@': path.resolve(__dirname, 'src'),
+      '@domain': path.resolve(__dirname, 'src/domain'),
     },
   },
 })

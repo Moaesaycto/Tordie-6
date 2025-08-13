@@ -1,7 +1,7 @@
+use discord_rpc_client::Client as RpcClient;
+use lazy_static::lazy_static;
 use std::sync::{Arc, Mutex};
 use std::{env, thread, time};
-use lazy_static::lazy_static;
-use discord_rpc_client::Client as RpcClient;
 
 lazy_static! {
     pub static ref CURRENT_PROJECT_NAME: Arc<Mutex<String>> =

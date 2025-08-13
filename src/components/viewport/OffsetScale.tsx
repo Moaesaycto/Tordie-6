@@ -1,6 +1,6 @@
 import { useRef, useLayoutEffect, useEffect } from 'react'
 import { useSnapshot } from 'valtio'
-import { state } from '@/CanvasState'
+import { state } from '@/components/canvas/CanvasState'
 import { useTheme } from '@/components/theme-provider'
 import Config from '@/tordie.config.json'
 

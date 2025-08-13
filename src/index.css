@@ -162,3 +162,21 @@ body,
     @apply bg-background text-foreground;
   }
 }
+
+
+:root {
+  --sb-track: var(--background);
+  --sb-thumb: color-mix(in oklch, var(--foreground) 35%, var(--muted));
+}
+
+.dark {
+  --sb-track: var(--background);
+  --sb-thumb: color-mix(in oklch, var(--foreground) 50%, var(--secondary));
+}
+
+/* Bind tokens to the class you put on the Tree */
+.ra-tree {
+  --track: var(--sb-track);
+  --thumb: var(--sb-thumb);
+  scrollbar-width: thin;
+}

@@ -1,0 +1,11 @@
+{
+    "$schema": "../gen/schemas/desktop-schema.json",
+    "identifier": "window-control",
+    "description": "Allow changing the window title",
+    "windows": [
+        "main"
+    ],
+    "permissions": [
+        "core:window:allow-set-title"
+    ]
+}
