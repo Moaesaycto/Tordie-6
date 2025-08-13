@@ -38,15 +38,6 @@ export class Scene {
   }
 
 
-  /*
-    point: { icon: TbTimeline, color: "#fff" },
-    line: { icon: TbLine, color: "#fff" },
-    circle: { icon: TbCircle  , color: "#fff" },
-    parametric: { icon: IoAnalyticsOutline, color: "#fff" },
-    group: { icon: IoAnalyticsOutline, color: "#fff" },
-    tessellation: { icon: IoAnalyticsOutline, color: "#fff" },
-    importedSvg: { icon: IoAnalyticsOutline, color: "#fff" },
-  */
   displayList(): SceneItemLabel[] {
     return [
       {

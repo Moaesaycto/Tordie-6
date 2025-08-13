@@ -8,6 +8,7 @@ import Footer from "@/components/main/footer";
 import Canvas from "@/components/canvas/Canvas";
 import { ControlPanel } from "@/components/controlpanel/ControlPanel";
 import { invoke } from '@tauri-apps/api/core';
+import Sidebar from "@/components/main/sidebar/Sidebar";
 
 invoke("test_command");
 
@@ -17,7 +18,8 @@ function App() {
     <div className="grid h-dvh grid-rows-[auto_1fr_auto] font-mono overflow-hidden" >
       <Header />
 
-      <main className="flex h-full flex-col overflow-hidden min-h-0">
+      <main className="flex h-full flex-row overflow-hidden min-h-0">
+        <Sidebar />
         <ResizablePanelGroup
           direction="horizontal"
           className="flex-1 overflow-hidden h-full min-h-0"
@@ -40,7 +42,6 @@ function App() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </main>
-
       <Footer />
     </div >
   );
