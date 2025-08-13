@@ -3,6 +3,7 @@ import { useSnapshot } from 'valtio'
 import { state } from '@/components/canvas/CanvasState'
 import { generateTicks } from '@/lib/ticks'
 import { useTheme } from '@/components/theme-provider'
+import { useApp } from '@/components/app-provider'
 
 const RULER_THICKNESS = 20
 const MAJOR_LENGTH = 10
@@ -10,6 +11,7 @@ const MINOR_LENGTH = 6
 const SUB_LENGTH = 3
 const MINOR_DIVISIONS = 5
 const SUB_DIVISIONS = 2
+const MARKER_SIZE = 7
 
 const formatLabel = (val: number) => val.toFixed(0)
 const getNiceStepSize = (len: number, zoom: number) => {
@@ -24,8 +26,8 @@ const getNiceStepSize = (len: number, zoom: number) => {
 }
 
 const colourSchemes = {
-  dark: { background: '#262626', overlap: '#404040', text: 'white' },
-  light: { background: '#dbdbdb', overlap: '#bababa', text: 'black' },
+  dark: { background: '#262626', overlap: '#404040', text: 'white', markerFill: 'white' },
+  light: { background: '#dbdbdb', overlap: '#bababa', text: 'black', markerFill: 'black' },
 }
 
 type RulerProps = { orientation: 'horizontal' | 'vertical' }
@@ -34,8 +36,10 @@ const CanvasRuler: React.FC<RulerProps> = ({ orientation }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const snap = useSnapshot(state)
   const { resolvedTheme } = useTheme()
-  const colours = colourSchemes[resolvedTheme as 'dark' | 'light'] ?? colourSchemes.light
+  const { viewport } = useApp()
+  const cursor = viewport.viewportCursorCoords
 
+  const colours = colourSchemes[resolvedTheme as 'dark' | 'light'] ?? colourSchemes.light
   const isVertical = orientation === 'vertical'
   const zoom = snap.zoom
   const offset = isVertical ? snap.pan.y : snap.pan.x
@@ -67,34 +71,24 @@ const CanvasRuler: React.FC<RulerProps> = ({ orientation }) => {
     canvas.height = h * window.devicePixelRatio
     canvas.style.width = `${w}px`
     canvas.style.height = `${h}px`
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
+    ctx.setTransform(window.devicePixelRatio, 0, 0, window.devicePixelRatio, 0, 0)
 
-    // Background
     ctx.fillStyle = colours.background
     ctx.fillRect(0, 0, w, h)
 
-    // Document region highlight
     const docStartPx = offset
     const docLengthPx = documentLength * zoom
     ctx.fillStyle = colours.overlap
-    if (isVertical) {
-      ctx.fillRect(0, docStartPx, RULER_THICKNESS, docLengthPx)
-    } else {
-      ctx.fillRect(docStartPx, 0, docLengthPx, RULER_THICKNESS)
-    }
+    if (isVertical) ctx.fillRect(0, docStartPx, RULER_THICKNESS, docLengthPx)
+    else ctx.fillRect(docStartPx, 0, docLengthPx, RULER_THICKNESS)
 
-    // Ticks and labels
     ctx.strokeStyle = colours.text
     ctx.fillStyle = colours.text
     ctx.font = '8px sans-serif'
     ctx.textBaseline = 'middle'
 
     for (const t of ticks) {
-      const len =
-        t.level === 'major' ? MAJOR_LENGTH :
-          t.level === 'minor' ? MINOR_LENGTH :
-            SUB_LENGTH
-
+      const len = t.level === 'major' ? MAJOR_LENGTH : t.level === 'minor' ? MINOR_LENGTH : SUB_LENGTH
       if (isVertical) {
         ctx.beginPath()
         ctx.moveTo(0, t.posPx)
@@ -105,7 +99,7 @@ const CanvasRuler: React.FC<RulerProps> = ({ orientation }) => {
           ctx.textAlign = 'center'
           ctx.translate(MAJOR_LENGTH + 5, t.posPx)
           ctx.rotate(-Math.PI / 2)
-          ctx.fillText(t.label ?? "", 0, 0)
+          ctx.fillText(t.label ?? '', 0, 0)
           ctx.restore()
         }
       } else {
@@ -115,19 +109,63 @@ const CanvasRuler: React.FC<RulerProps> = ({ orientation }) => {
         ctx.stroke()
         if (t.level === 'major') {
           ctx.textAlign = 'center'
-          ctx.fillText(t.label ?? "", t.posPx, MAJOR_LENGTH + 5)
+          ctx.fillText(t.label ?? '', t.posPx, MAJOR_LENGTH + 5)
         }
       }
     }
-  }, [isVertical, zoom, offset, lengthPx, documentLength, ticks, colours])
+
+    if (cursor) {
+      const cursorPosPxRaw = isVertical ? cursor.y : cursor.x
+      const posPx = Math.max(0, Math.min(lengthPx, cursorPosPxRaw))
+      
+      ctx.fillStyle = colours.markerFill
+      ctx.strokeStyle = colours.markerFill
+      ctx.beginPath()
+      if (isVertical) {
+        const y = posPx
+        ctx.moveTo(RULER_THICKNESS, y)
+        ctx.lineTo(RULER_THICKNESS - MARKER_SIZE, y - MARKER_SIZE)
+        ctx.lineTo(RULER_THICKNESS - MARKER_SIZE, y + MARKER_SIZE)
+        ctx.closePath()
+      } else {
+        const x = posPx
+        ctx.moveTo(x, RULER_THICKNESS)
+        ctx.lineTo(x - MARKER_SIZE, RULER_THICKNESS - MARKER_SIZE)
+        ctx.lineTo(x + MARKER_SIZE, RULER_THICKNESS - MARKER_SIZE)
+        ctx.closePath()
+      }
+      ctx.fill()
+
+      // If you want text over the ruler (unused but useful)
+      /* const value = (posPx - offset) / zoom
+      const label = formatLabel(value)
+      ctx.fillStyle = colours.text
+      ctx.font = '10px sans-serif'
+      ctx.textBaseline = 'middle'
+      if (isVertical) {
+        ctx.textAlign = 'left'
+        ctx.fillText(label, MARKER_SIZE + 2, Math.round(posPx))
+      } else {
+        ctx.textAlign = 'center'
+        ctx.fillText(label, Math.round(posPx), RULER_THICKNESS - MARKER_SIZE - 8)
+      } */
+    }
+  }, [
+    isVertical,
+    zoom,
+    offset,
+    lengthPx,
+    documentLength,
+    ticks,
+    colours,
+    cursor?.x,
+    cursor?.y,
+  ])
 
   return (
     <canvas
       ref={canvasRef}
-      style={{
-        display: 'block',
-        background: colours.background,
-      }}
+      style={{ display: 'block', background: colours.background, pointerEvents: 'none' }}
     />
   )
 }
