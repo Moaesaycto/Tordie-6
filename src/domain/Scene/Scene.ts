@@ -3,13 +3,14 @@ import { Item } from "@domain/Item/Item";
 import { Geometry, GeometryData } from "@domain/Geometry/Geometry";
 import { GeometryEvaluator, Modifier, ModifierType } from "@domain/Modifiers/Modifier";
 import { identityTransform } from "@domain/Math/Math";
+import { SceneItemLabel } from "@/types/scene";
 
 
 // TODO: Make these real
 const MODIFIERS = [
-    "Reflect",
-    "Array",
-    "Twist"
+  "Reflect",
+  "Array",
+  "Twist"
 ]
 
 export class Scene {
@@ -34,6 +35,57 @@ export class Scene {
 
   constructor() {
     MODIFIERS.map((e) => this.registerModifier(e, (g) => g)) // identity evaluator default (no-op)
+  }
+
+
+  /*
+    point: { icon: TbTimeline, color: "#fff" },
+    line: { icon: TbLine, color: "#fff" },
+    circle: { icon: TbCircle  , color: "#fff" },
+    parametric: { icon: IoAnalyticsOutline, color: "#fff" },
+    group: { icon: IoAnalyticsOutline, color: "#fff" },
+    tessellation: { icon: IoAnalyticsOutline, color: "#fff" },
+    importedSvg: { icon: IoAnalyticsOutline, color: "#fff" },
+  */
+  displayList(): SceneItemLabel[] {
+    return [
+      {
+        id: "1",
+        type: "point",
+        name: "Point",
+      },
+      {
+        id: "2",
+        type: "line",
+        name: "Line",
+      },
+      {
+        id: "3",
+        type: "circle",
+        name: "Circle",
+      },
+      {
+        id: "4",
+        type: "parametric",
+        name: "Parametric",
+      },
+      {
+        id: "5",
+        type: "group",
+        name: "Group",
+        children: [],
+      },
+      {
+        id: "6",
+        type: "tessellation",
+        name: "Tessellation",
+      },
+      {
+        id: "7",
+        type: "importedSvg",
+        name: "Imported SVG",
+      },
+    ]
   }
 
   createGeometry(payload: GeometryData, meta?: Record<string, unknown>): Id {

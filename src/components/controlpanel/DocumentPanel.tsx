@@ -17,6 +17,9 @@ const DocumentPanel = () => {
 
   return (
     <div className={`w-full space-y-1 ${fontSize}`}>
+      <div>
+
+      </div>
       <div className="flex gap-2">
         <Input
           value={draft}
