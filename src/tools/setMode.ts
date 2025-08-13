@@ -1,18 +1,12 @@
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useRef } from 'react';
 import Konva from 'konva';
 import { useDocument } from '@/components/document-provider';
 import { Mode } from '@/types/state';
 
 const selNS = '.selectTool';
 
-type Deps = {
-    layerRef: RefObject<Konva.Layer>;
-    selRef: RefObject<Konva.Rect>;
-    trRef: RefObject<Konva.Transformer>;
-};
-
-export function useSetMode(mode: Mode, { layerRef, selRef, trRef }: Deps) {
-    const { stage: stageRef } = useDocument();
+export function useSetMode(mode: Mode) {
+    const { stage: stageRef, tools: {selRef, layerRef, trRef} } = useDocument();
     const selectingRef = useRef(false);
     const x1 = useRef(0), y1 = useRef(0);
 
@@ -27,6 +21,8 @@ export function useSetMode(mode: Mode, { layerRef, selRef, trRef }: Deps) {
         stage.off(selNS);
         stage.container().style.cursor = 'default';
         sel.visible(false);
+        sel.strokeScaleEnabled(false);
+        sel.strokeWidth(1);
         tr.nodes([]);
         layer.getStage()?.batchDraw();
 

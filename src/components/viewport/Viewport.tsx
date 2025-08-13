@@ -6,18 +6,14 @@ import { state } from '@/components/canvas/CanvasState';
 import { useApp } from '../app-provider';
 import { useViewportControls } from '@/components/hooks/viewport/useViewportControls';
 import { useDocument } from '@/components/document-provider';
-import { useSetMode } from '@/tools/setMode'; // <-- your hook
 
 export default function Viewport() {
   const snap = useSnapshot(state);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
-  const mainLayerRef = useRef<Konva.Layer>(null);
-  const selRef = useRef<Konva.Rect>(null);
-  const trRef = useRef<Konva.Transformer>(null);
 
-  const { setStage } = useDocument();
+  const { setStage, tools: { layerRef, selRef, trRef } } = useDocument();
 
   const {
     viewport: { setViewportCursorCoords, setViewportWidth, setViewportHeight },
@@ -50,12 +46,6 @@ export default function Viewport() {
     return () => observer.disconnect();
   }, [setViewportWidth, setViewportHeight]);
 
-  useSetMode(snap.mode, {
-    layerRef: mainLayerRef,
-    selRef,
-    trRef,
-  });
-
   return (
     <div ref={wrapperRef} className="flex flex-col min-w-0 min-h-0 w-full h-full">
       <Stage
@@ -73,7 +63,7 @@ export default function Viewport() {
           display: 'block',
         }}
       >
-        <Layer ref={mainLayerRef}>
+        <Layer ref={layerRef}>
           <Circle
             name="selectable"
             x={snap.circle.x}
@@ -104,8 +94,11 @@ export default function Viewport() {
           <Rect
             ref={selRef}
             visible={false}
-            fill="rgba(0,120,255,0.15)"
-            stroke="rgba(0,120,255,1)"
+            // fill="rgba(0,120,255,0.15)"
+            stroke="rgba(0,0,0,1)"
+            strokeWidth={1}
+            dash={[4, 4]}
+            strokeScaleEnabled={false}
           />
         </Layer>
         <Layer>

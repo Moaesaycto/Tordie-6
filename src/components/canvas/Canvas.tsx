@@ -4,6 +4,7 @@ import OffsetScale from "@/components/viewport/OffsetScale"
 import ToOriginButton from "@/components/viewport/ToOriginButton"
 import { useViewportSize } from "@/components/hooks/viewport/useViewportSize"
 import { useRef } from "react"
+import CanvasModeBinder from "./CanvasModeBinder"
 
 const RULER_SIZE = 20
 const SCROLL_SIZE = 17
@@ -33,6 +34,7 @@ const Canvas = () => {
             ref={viewportRef}
           >
             <Viewport />
+            <CanvasModeBinder />
           </div>
           <OffsetScale />
           {corner}

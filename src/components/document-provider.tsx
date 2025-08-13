@@ -4,11 +4,23 @@ import config from "@/tordie.config.json";
 import { invoke } from '@tauri-apps/api/core';
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
+type ToolsRefs = {
+  layerRef: React.RefObject<Konva.Layer | null>;
+  selRef: React.RefObject<Konva.Rect | null>;
+  trRef: React.RefObject<Konva.Transformer | null>;
+};
+
 type DocumentCtx = {
+  // stage
   stage: React.RefObject<Konva.Stage | null>;
+  setStage: (stage: Konva.Stage | null) => void;
+
+  // tools (selection UI etc.)
+  tools: ToolsRefs;
+
+  // doc meta
   title: string;
   setTitle: (title: string) => void;
-  setStage: (stage: Konva.Stage | null) => void;
   dirty: boolean;
   markDirty: () => void;
   markClean: () => void;
@@ -17,35 +29,29 @@ type DocumentCtx = {
 const DocumentProviderContext = createContext<DocumentCtx | undefined>(undefined);
 
 export function DocumentProvider({ children }: { children?: ReactNode }) {
+  // stage ref
   const stageRef = useRef<Konva.Stage | null>(null);
   const setStage = useCallback((stage: Konva.Stage | null) => { stageRef.current = stage; }, []);
-  const [title, _setTitle] = useState<string>(config.document.default_name);
 
+  // tool refs (shared across app)
+  const layerRef = useRef<Konva.Layer | null>(null);
+  const selRef = useRef<Konva.Rect | null>(null);
+  const trRef = useRef<Konva.Transformer | null>(null);
+
+  // title/dirty
+  const [title, _setTitle] = useState<string>(config.document.default_name);
   const [dirty, setDirty] = useState(false);
   const markDirty = useCallback(() => setDirty(true), []);
   const markClean = useCallback(() => setDirty(false), []);
-  const setTitle = useCallback((t: string) => {
-    _setTitle(t);
-    setDirty(true);
-  }, []);
+  const setTitle = useCallback((t: string) => { _setTitle(t); setDirty(true); }, []);
 
-  // TODO: Prevent reloading when dirty
-  /* useEffect(() => {
-    const onBeforeUnload = (e: BeforeUnloadEvent) => {
-      if (dirty) { e.preventDefault(); e.returnValue = ''; }
-    };
-    window.addEventListener('beforeunload', onBeforeUnload);
-    return () => window.removeEventListener('beforeunload', onBeforeUnload);
-  }, [dirty]); */
-
-  // Updating project name
+  // notify backend (Tauri) on title change
   useEffect(() => {
     invoke("update_project_name", { newName: title })
-      .then(() => console.log("Command sent"))
       .catch(err => console.error("Failed to send command", err));
   }, [title]);
 
-  // Changing window title when title changes or is dirty
+  // window title
   useEffect(() => {
     (async () => {
       try {
@@ -62,6 +68,7 @@ export function DocumentProvider({ children }: { children?: ReactNode }) {
       value={{
         stage: stageRef,
         setStage,
+        tools: { layerRef, selRef, trRef },
         title,
         setTitle,
         dirty,
