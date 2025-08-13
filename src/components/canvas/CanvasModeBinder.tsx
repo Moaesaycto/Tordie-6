@@ -1,5 +1,5 @@
 import { useAppState } from '@/components/state-provider';
-import { useSetMode } from '@/tools/setMode';
+import { useSetMode } from '@/tools/useSetMode';
 
 export default function CanvasModeBinder() {
     const { currentState } = useAppState();

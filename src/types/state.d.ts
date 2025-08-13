@@ -5,5 +5,5 @@ export type Mode = 'select';
 
 export type State = {
     panelState: Panel,
-    mode: Mode, 
+    mode: Mode | null, 
 }
