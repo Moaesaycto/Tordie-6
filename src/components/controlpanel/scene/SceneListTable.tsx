@@ -69,13 +69,12 @@ function Node({ node, style, dragHandle }: NodeRendererProps<SceneItemLabel>) {
 
   const hoverStyle = resolvedTheme === "light" ? "hover:bg-neutral-300" : "hover:bg-neutral-600";
   const dropBg = node.isInternal && node.willReceiveDrop ? "bg-blue-500/40" : "";
-  const selectedBg = node.isSelected ? "bg-primary text-primary-foreground" : "";
 
   return (
     <div
       ref={dragHandle}
       style={style}
-      className={`flex items-center justify-between w-full text-sm px-2 ${hoverStyle} ${dropBg} ${selectedBg}`}
+      className={`flex items-center justify-between w-full text-sm px-2 ${hoverStyle} ${dropBg}`}
       title={`Item ID: ${node.id}`}
       onClick={() => node.isInternal && node.toggle()}
     >
