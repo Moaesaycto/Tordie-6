@@ -1,5 +1,5 @@
 import { getGeometryIcon } from '@/domain/Geometry/icons';
-import { SceneItemLabel } from '@/types/scene';
+import { DiagramItemLabel } from '@/types/diagram';
 import { Tree } from 'react-arborist';
 import type { NodeRendererProps } from 'react-arborist';
 import AutoSizer from 'react-virtualized-auto-sizer';
@@ -10,14 +10,14 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 type Props = {
-  items: SceneItemLabel[];
+  items: DiagramItemLabel[];
   selectedId: string | null;
-  onSelect: (item: SceneItemLabel | null) => void;
+  onSelect: (item: DiagramItemLabel | null) => void;
 };
 
 const ROW_HEIGHT = 20;
 
-const SceneListTable = ({ items, selectedId, onSelect }: Props) => {
+const DiagramListTable = ({ items, selectedId, onSelect }: Props) => {
   const [term, setTerm] = useState("");
   const searchTerm = useMemo(() => term.trim(), [term]);
 
@@ -42,7 +42,7 @@ const SceneListTable = ({ items, selectedId, onSelect }: Props) => {
       <div className="flex-1 min-h-0">
         <AutoSizer>
           {({ width, height }) => (
-            <Tree<SceneItemLabel>
+            <Tree<DiagramItemLabel>
               initialData={items}
               width={Math.max(1, width)}
               height={Math.max(1, height)}
@@ -80,8 +80,8 @@ const SceneListTable = ({ items, selectedId, onSelect }: Props) => {
 
 function Node(
   { node, style, dragHandle, onSelect, onVisibilityChange }:
-    NodeRendererProps<SceneItemLabel> & {
-      onSelect: (item: SceneItemLabel | null) => void;
+    NodeRendererProps<DiagramItemLabel> & {
+      onSelect: (item: DiagramItemLabel | null) => void;
       onVisibilityChange?: (id: string, visible: boolean) => void;
     }
 ) {
@@ -139,4 +139,4 @@ function Node(
 
 
 
-export default SceneListTable;
+export default DiagramListTable;

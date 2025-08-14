@@ -2,9 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { getGeometryIcon } from "@/domain/Geometry/icons";
 import { InfoIcon } from "lucide-react";
-import type { SceneItemLabel } from "@/types/scene";
+import type { DiagramItemLabel } from "@/types/diagram";
 
-export default function EditItem({ item, onChange }: { item: SceneItemLabel; onChange?: (patch: Partial<SceneItemLabel>) => void }) {
+export default function EditItem({ item, onChange }: { item: DiagramItemLabel; onChange?: (patch: Partial<DiagramItemLabel>) => void }) {
   const { icon: Icon, color, label } = getGeometryIcon(item.type);
   const nameId = `name-${item.id}`;
 
@@ -21,7 +21,6 @@ export default function EditItem({ item, onChange }: { item: SceneItemLabel; onC
     <div className="space-y-1">
       <div className="flex items-center justify-between">
         <span className="text-xs">Item Inspector</span>
-
       </div>
       <div className="flex h-6 w-full overflow-hidden text-xs">
         <div

@@ -1,19 +1,28 @@
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
 import { useRef, useEffect, useState, type ComponentType } from "react";
 import { useAppState } from "@/components/state-provider";
 import type { Panel } from "@/types/state";
 import { useFontSize } from "@/lib/format";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FileTextIcon, InfoIcon } from "lucide-react";
+import { BiExport } from "react-icons/bi";
+import { MdOutlineCreate } from "react-icons/md";
 
-import DocumentController from "./DocumentPanel";
+import DocumentPanel from "./DocumentPanel";
 import ExportPanel from "./ExportPanel";
-import ScenePanel from "./ScenePanel";
+import DiagramPanel from "./DiagramPanel";
 
-type PanelDef = { label: string; component: ComponentType };
+type PanelDef = {
+  label: string;
+  component: ComponentType;
+  icon: any;
+  color?: string;
+};
+
 const PANELS: Record<Panel, PanelDef> = {
-  document: { label: "Document", component: DocumentController },
-  export: { label: "Export", component: ExportPanel },
-  scene: { label: "Scene", component: ScenePanel },
+  diagram: { label: "Diagram", component: DiagramPanel, icon: MdOutlineCreate, color: "#61b56a" },
+  document: { label: "Document", component: DocumentPanel, icon: FileTextIcon, color: "#c45050" },
+  export: { label: "Export", component: ExportPanel, icon: BiExport, color: "#5762db" },
 };
 
 export function ControlPanel() {
@@ -21,13 +30,11 @@ export function ControlPanel() {
   const headerRef = useRef<HTMLDivElement>(null);
   const [scrollHeight, setScrollHeight] = useState(0);
 
-  const { currentState } = useAppState(); // currentState.panelState: Panel
+  const { currentState } = useAppState();
   const [value, setValue] = useState<Panel>(currentState.panelState);
 
-  // keep select synced with external state
   useEffect(() => setValue(currentState.panelState), [currentState.panelState]);
 
-  // compute scroll height
   useEffect(() => {
     const updateHeight = () => {
       if (!wrapperRef.current || !headerRef.current) return;
@@ -44,19 +51,11 @@ export function ControlPanel() {
 
   return (
     <div ref={wrapperRef} className="flex flex-col w-full h-full overflow-hidden">
-      <div ref={headerRef} className="shrink-0 border-b p-2">
-        <Select value={value} onValueChange={(v) => setValue(v as Panel)}>
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select panel" />
-          </SelectTrigger>
-          <SelectContent>
-            {(Object.keys(PANELS) as Panel[]).map((id) => (
-              <SelectItem key={id} value={id}>
-                {PANELS[id].label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      <div ref={headerRef} className="shrink-0 border-b mt-1">
+        <PanelSelect
+          value={value}
+          onChange={(id: Panel) => setValue(id)}
+        />
       </div>
 
       <ScrollArea className=" flex-1 w-full" style={{ height: scrollHeight }}>
@@ -69,12 +68,115 @@ export function ControlPanel() {
   );
 }
 
+
+type PanelSelectProps = {
+  value: Panel;
+  onChange: (id: Panel) => void;
+};
+
+const PanelSelect = ({ value, onChange }: PanelSelectProps) => {
+  const [selected, setSelected] = useState<(PanelDef & { id: Panel })>();
+
+  useEffect(() => {
+    setSelected({ id: value, ...PANELS[value] });
+  }, [value]);
+
+  return (
+    <div>
+      <div className="flex gap-1 px-2">
+        {(Object.keys(PANELS) as Panel[]).map((id) => {
+          const { label, icon: Icon, color } = PANELS[id];
+
+          return (
+            <div key={id} className="flex items-center gap-1">
+              <span
+                className="flex items-center justify-center rounded-t"
+                title={label}
+                style={{
+                  backgroundColor: color,
+                  borderWidth: 2,
+                  width: 24,
+                  height: 24,
+                  borderBottom: "none",
+                }}
+                onClick={() => {
+                  setSelected({ id, ...PANELS[id] });
+                  onChange(id);
+                }}
+                role="button"
+                aria-pressed={selected?.id === id}
+              >
+                <Icon className="h-4 w-4" style={{ color: "white" }} />
+              </span>
+            </div>
+          );
+        })}
+      </div>
+      <div
+        className="border w-full text-center text-sm uppercase rounded-t"
+        style={{
+          borderColor: selected?.color,
+          backgroundColor: selected?.color,
+          color: "white",
+          borderWidth: 2,
+        }}
+      >
+        {selected?.label}
+      </div>
+    </div>
+  );
+};
+
+
 type PanelPageProps = { children: React.ReactNode };
 export const PanelPage = ({ children }: PanelPageProps) => {
   const fontSize = useFontSize();
   return (
-    <div className={`flex h-full min-h-0 flex-col w-full space-y-1 ${fontSize} gap-4 p-1`}>
+    <div className={`flex h-full min-h-0 flex-col w-full space-y-1 ${fontSize} gap-4 p-1 bg-accent `}>
       {children}
+    </div>
+  );
+};
+
+
+type InputRowProps = {
+  label: string;
+  title?: string;
+  defaultValue?: string;
+  placeholder?: string;
+  onCommit: (e: string) => void;
+}
+
+export const InputRow = ({ label, title, defaultValue, placeholder, onCommit }: InputRowProps) => {
+  const [draft, setDraft] = useState(defaultValue ?? "");
+
+  const commit = () => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== (defaultValue ?? "")) {
+      onCommit(trimmed);
+    }
+  };
+
+  return (
+    <div className="flex items-center">
+      <span className="basis-1/3 text-xs text-left">{label}</span>
+      <Input
+        className="flex-1 h-full border-1 rounded-none focus-visible:ring-0 focus:outline-none px-2 text-xs sm:text-xs md:text-xs"
+        value={draft}
+        placeholder={placeholder}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.currentTarget.blur();
+          }
+        }}
+      />
+      {title &&
+        <div title={title} className="ml-1">
+          <InfoIcon className="h-4 w-4" />
+        </div>
+      }
     </div>
   );
 };

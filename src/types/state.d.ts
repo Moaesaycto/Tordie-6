@@ -1,4 +1,4 @@
-export type Panel = 'document' | 'export' | 'scene'
+export type Panel = 'document' | 'export' | 'diagram'
 
 export type Mode = 'select';
 

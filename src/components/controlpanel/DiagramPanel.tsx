@@ -1,17 +1,17 @@
 import { useCallback, useMemo, useState } from "react";
 import { PanelPage } from "./ControlPanel";
-import { useScene } from "@/components/scene-provider";
-import SceneListTable from "./scene/SceneListTable";
-import { SceneItemLabel } from "@/types/scene";
-import CreateItem from "./scene/CreateItem";
-import EditItem from "./scene/EditItem";
+import { useDiagram } from "@/components/diagram-provider";
+import DiagramListTable from "./diagram/DiagramListTable";
+import { DiagramItemLabel } from "@/types/diagram";
+import CreateItem from "./diagram/CreateItem";
+import EditItem from "./diagram/EditItem";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 const ScenePanel = () => {
-  const scene = useScene();
+  const scene = useDiagram();
 
-  const items: SceneItemLabel[] = useMemo(() => {
-    try { return scene.displayList() as SceneItemLabel[]; } catch { return []; }
+  const items: DiagramItemLabel[] = useMemo(() => {
+    try { return scene.displayList() as DiagramItemLabel[]; } catch { return []; }
   }, [scene]);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -20,10 +20,9 @@ const ScenePanel = () => {
     [items, selectedId]
   );
 
-  const handleEditChange = useCallback((patch: Partial<SceneItemLabel>) => {
+  const handleEditChange = useCallback((patch: Partial<DiagramItemLabel>) => {
     if (!selectedItem) return;
     if (patch.name !== undefined) {
-      // e.g. scene.updateItem / scene.rename / scene.setLabel — use your real method
       scene.updateItem(selectedItem.id, { name: patch.name });
     }
   }, [scene, selectedItem]);
@@ -33,21 +32,21 @@ const ScenePanel = () => {
       <div className="h-full min-h-0 rounded">
         <ResizablePanelGroup direction="vertical" className="h-full">
           <ResizablePanel defaultSize={20} minSize={20} className="flex flex-col min-h-0">
-            <SceneListTable
+            <DiagramListTable
               items={items}
               selectedId={selectedId}
               onSelect={(item) => setSelectedId(item?.id ?? null)}
             />
           </ResizablePanel>
-          <ResizableHandle />
-          <ResizablePanel defaultSize={20} minSize={20} className="flex flex-col min-h-0">
-            <div className="p-2">
+          <ResizableHandle withHandle />
+          <ResizablePanel defaultSize={20} minSize={10} className="flex flex-col min-h-0">
+            <div className="p-2 h-full">
               {selectedItem === null
                 ? <CreateItem />
                 : <EditItem item={selectedItem} onChange={handleEditChange} />}
             </div>
           </ResizablePanel>
-          <ResizableHandle />
+          <ResizableHandle withHandle />
           <ResizablePanel defaultSize={60} minSize={20} className="flex flex-col min-h-0">
             Third panel?
           </ResizablePanel>

@@ -4,7 +4,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { AppProvider } from '@/components/app-provider.tsx'
 import { DocumentProvider } from '@/components/document-provider.tsx'
 import { StateProvider } from '@/components/state-provider.tsx'
-import { SceneProvider } from '@/components/scene-provider.tsx'
+import { DiagramProvider } from '@/components/diagram-provider'
 
 import '@/index.css'
 import App from '@/App.tsx'
@@ -13,13 +13,13 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AppProvider>
       <StateProvider>
-        <SceneProvider>
+        <DiagramProvider>
           <DocumentProvider>
             <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
               <App />
             </ThemeProvider>
           </DocumentProvider>
-        </SceneProvider>
+        </DiagramProvider>
       </StateProvider>
     </AppProvider>
   </StrictMode>,

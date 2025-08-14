@@ -7,7 +7,7 @@ type StateProviderState = {
 };
 
 const initialState: StateProviderState = {
-  currentState: { panelState: "scene", mode: "select" },
+  currentState: { panelState: "document", mode: "select" },
   setCurrentState: () => {},
 };
 

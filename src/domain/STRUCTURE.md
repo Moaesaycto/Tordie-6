@@ -2,8 +2,8 @@
 ## Developer reference only
 
 ```
-Scene
-├─ Items (instances in the scene; aka nodes)
+Diagram
+├─ Items (instances in the diagram; aka nodes)
 │  ├─ Item (id)
 │  │  ├─ parent: ItemId | null
 │  │  ├─ children: ItemId[]

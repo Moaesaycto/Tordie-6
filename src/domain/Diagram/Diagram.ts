@@ -3,7 +3,7 @@ import { Item } from "@domain/Item/Item";
 import { Geometry, GeometryData } from "@domain/Geometry/Geometry";
 import { GeometryEvaluator, Modifier, ModifierType } from "@domain/Modifiers/Modifier";
 import { identityTransform } from "@domain/Math/Math";
-import { SceneItemLabel } from "@/types/scene";
+import { DiagramItemLabel } from "@/types/diagram";
 
 
 // TODO: Make these real
@@ -17,7 +17,7 @@ const MODIFIERS = [
     name?: string;
   }
 
-export class Scene {
+export class Diagram {
   // stores
   readonly items = new Map<Id, Item>();
   readonly geoms = new Map<Id, Geometry>();
@@ -42,7 +42,7 @@ export class Scene {
   }
 
 
-  displayList(): SceneItemLabel[] {
+  displayList(): DiagramItemLabel[] {
     return [
       {
         id: "1",

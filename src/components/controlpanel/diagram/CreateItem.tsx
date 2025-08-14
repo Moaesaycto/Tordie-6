@@ -43,14 +43,14 @@ const itemStyle = "h-6 text-xs pl-2 rounded-none w-full";
 
 const CreateItem = () => {
   return (
-    <div>
-      <span>
-        Create new Item
-      </span>
-      <div className="flex gap-2 w-full">
+    <div className="space-y-1">
+      <div className="flex items-center justify-between">
+        <span className="text-xs">Create New Item</span>
+      </div>
+      <div className="flex w-full rounded overflow-hidden">
         <div className="flex flex-1">
           <Select defaultValue="point">
-            <SelectTrigger className="w-full !h-6 !py-0 text-xs [&_svg]:size-3">
+            <SelectTrigger className="w-full !h-6 text-xs rounded-r-none rounded-l-xs  border-1  [&_svg]:size-3">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-primary-foreground m-1 w-full">
@@ -77,7 +77,7 @@ const CreateItem = () => {
             </SelectContent>
           </Select>
         </div>
-        <Button className="!h-6 !py-0 px-2">
+        <Button className="h-6 w-6 rounded-none">
           <PlusIcon className="size-3" />
         </Button>
       </div>

@@ -1,9 +1,9 @@
 import { GeometryKind } from "@domain/Geometry/Geometry";
 
-export type SceneItemLabel = {
+export type DiagramItemLabel = {
     id: string;
     type: GeometryKind;
     name: string;
     visible: boolean;
-    children?: SceneItemLabel[];
+    children?: DiagramItemLabel[];
 }

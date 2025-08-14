@@ -102,7 +102,11 @@ export default function Viewport() {
           />
         </Layer>
         <Layer>
-          <Transformer ref={trRef} ignoreStroke rotateEnabled={false} />
+          <Transformer
+            ref={trRef}
+            ignoreStroke
+            rotateEnabled={false}
+          />
         </Layer>
       </Stage>
     </div>
