@@ -13,10 +13,9 @@ export function enableSelectMode({ stage, layer, sel, tr, ns }: SelectModeDeps):
   let x1 = 0, y1 = 0;
 
   stage.container().style.cursor = 'crosshair';
-  // visual prefs (keep 1px on screen, dashed)
-  sel.strokeScaleEnabled(false);
-  sel.strokeWidth(1);
-  sel.dash([4, 4]);
+
+  const onWindowUp = () => selecting && onUp({ evt: { button: 0 } } as any);
+  window.addEventListener('mouseup', onWindowUp);
 
   const scenePos = () => {
     const p = stage.getPointerPosition();
@@ -25,12 +24,11 @@ export function enableSelectMode({ stage, layer, sel, tr, ns }: SelectModeDeps):
     return inv.point(p);
   };
 
-  const isLeft = (e: Konva.KonvaEventObject<any>) =>
-    e.evt instanceof MouseEvent && e.evt.button === 0;
+  const isPrimary = (e: Konva.KonvaEventObject<any>) =>
+    'button' in e.evt ? e.evt.button === 0 : true;
 
-  const onDown = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!isLeft(e)) return;
-    if (e.target !== stage) return; // start only from empty stage
+  const onDown = (e: Konva.KonvaEventObject<any>) => {
+    if (!isPrimary(e)) return;
     const p = scenePos(); if (!p) return;
     selecting = true;
     x1 = p.x; y1 = p.y;
@@ -51,7 +49,7 @@ export function enableSelectMode({ stage, layer, sel, tr, ns }: SelectModeDeps):
   };
 
   const onUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!selecting || !isLeft(e)) return;
+    if (!selecting || !isPrimary(e)) return;
     selecting = false;
 
     const box = sel.getClientRect({ skipTransform: false });
@@ -62,16 +60,20 @@ export function enableSelectMode({ stage, layer, sel, tr, ns }: SelectModeDeps):
     tr.nodes(selected);
     sel.visible(false);
     layer.batchDraw();
+    console.log(tr.nodes().length);
   };
 
   const onClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
-    if (!isLeft(e)) return;
+    if (!isPrimary(e)) return;
     if (e.target === stage || selecting) return;
     const multi = (e.evt as MouseEvent).ctrlKey || (e.evt as MouseEvent).metaKey;
     const nodes = multi ? [...tr.nodes(), e.target] : [e.target];
     tr.nodes(nodes.filter(n => n.hasName('selectable')));
     layer.batchDraw();
   };
+
+  sel.listening(false);  // don't intercept events
+  sel.draggable(false);
 
   stage.on('mousedown' + ns, onDown);
   stage.on('mousemove' + ns, onMove);
@@ -84,5 +86,6 @@ export function enableSelectMode({ stage, layer, sel, tr, ns }: SelectModeDeps):
     sel.visible(false);
     tr.nodes([]);
     layer.getStage()?.batchDraw();
+    window.removeEventListener('mouseup', onWindowUp);
   };
 }

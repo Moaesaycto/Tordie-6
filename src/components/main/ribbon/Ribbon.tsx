@@ -1,5 +1,9 @@
+// Ribbon.tsx
 import { Button } from "@/components/ui/button";
 import SelectAllIcon from "@/assets/buttons/select-all.svg?react";
+import { useDocument } from "@/components/document-provider";
+import { selectAll } from "@/tools/commands/SelectAll";
+import { useCallback } from "react";
 
 const Ribbon = () => (
   <div className="flex flex-row gap-2 items-center w-full p-1 h-12">
@@ -24,17 +28,16 @@ const RibbonButton = ({ onClick, title, Icon }: RibbonButtonProps) => (
 );
 
 const SelectAllButton = () => {
-  const onClick = () => {
-    console.log("Select all...");
-  }
+  const { tools: { layerRef, trRef } } = useDocument();
 
-  return (
-    <RibbonButton
-      title="Select All"
-      Icon={SelectAllIcon}
-      onClick={onClick}
-    />
-  );
-}
+  const onClick = useCallback(() => {
+    const layer = layerRef.current;
+    const tr = trRef.current;
+    if (!layer || !tr) return;
+    selectAll(layer, tr);
+  }, [layerRef, trRef]);
+
+  return <RibbonButton title="Select All" Icon={SelectAllIcon} onClick={onClick} />;
+};
 
 export default Ribbon;
