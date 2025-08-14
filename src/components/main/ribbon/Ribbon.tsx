@@ -1,4 +1,3 @@
-// Ribbon.tsx
 import { Button } from "@/components/ui/button";
 import SelectAllIcon from "@/assets/buttons/select-all.svg?react";
 import { useDocument } from "@/components/document-provider";

@@ -13,6 +13,10 @@ const MODIFIERS = [
   "Twist"
 ]
 
+  type MutableProps = {
+    name?: string;
+  }
+
 export class Scene {
   // stores
   readonly items = new Map<Id, Item>();
@@ -44,39 +48,50 @@ export class Scene {
         id: "1",
         type: "point",
         name: "Point",
+        visible: true,
       },
       {
         id: "2",
         type: "line",
         name: "Line",
+        visible: true,
       },
       {
         id: "3",
         type: "circle",
         name: "Circle",
+        visible: true,
       },
       {
         id: "4",
         type: "parametric",
         name: "Parametric",
+        visible: true,
       },
       {
         id: "5",
         type: "group",
         name: "Group",
         children: [],
+        visible: true,
       },
       {
         id: "6",
         type: "tessellation",
         name: "Tessellation",
+        visible: true,
       },
       {
         id: "7",
         type: "importedSvg",
         name: "Imported SVG",
+        visible: true,
       },
     ]
+  }
+
+  updateItem(id: string, info: MutableProps) {
+    console.log(`Updating: ${id} to: `, info)
   }
 
   createGeometry(payload: GeometryData, meta?: Record<string, unknown>): Id {

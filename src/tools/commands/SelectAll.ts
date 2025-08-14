@@ -1,4 +1,3 @@
-// tools/selectAll.ts (no hooks here)
 import Konva from "konva";
 
 export function selectAll(layer: Konva.Layer, tr: Konva.Transformer): void {

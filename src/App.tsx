@@ -36,7 +36,7 @@ function App() {
             id="controller-home"
             defaultSize={30}
             minSize={20}
-            className="h-full flex flex-col min-h-0"
+            className="flex flex-col min-h-0 h-dvh"
           >
             <ControlPanel />
           </ResizablePanel>

@@ -9,7 +9,6 @@ import DocumentController from "./DocumentPanel";
 import ExportPanel from "./ExportPanel";
 import ScenePanel from "./ScenePanel";
 
-// Map panels by identifier (matches your union)
 type PanelDef = { label: string; component: ComponentType };
 const PANELS: Record<Panel, PanelDef> = {
   document: { label: "Document", component: DocumentController },
@@ -45,7 +44,6 @@ export function ControlPanel() {
 
   return (
     <div ref={wrapperRef} className="flex flex-col w-full h-full overflow-hidden">
-      {/* Header */}
       <div ref={headerRef} className="shrink-0 border-b p-2">
         <Select value={value} onValueChange={(v) => setValue(v as Panel)}>
           <SelectTrigger className="w-full">
@@ -61,9 +59,8 @@ export function ControlPanel() {
         </Select>
       </div>
 
-      {/* Body */}
-      <ScrollArea className="w-full" style={{ height: scrollHeight }}>
-        <div className="p-2 h-full">
+      <ScrollArea className=" flex-1 w-full" style={{ height: scrollHeight }}>
+        <div style={{ height: scrollHeight }}>
           <PanelComponent />
         </div>
         <ScrollBar orientation="vertical" />
@@ -76,7 +73,7 @@ type PanelPageProps = { children: React.ReactNode };
 export const PanelPage = ({ children }: PanelPageProps) => {
   const fontSize = useFontSize();
   return (
-    <div className={`flex h-full min-h-0 flex-col w-full space-y-1 ${fontSize} gap-4`}>
+    <div className={`flex h-full min-h-0 flex-col w-full space-y-1 ${fontSize} gap-4 p-1`}>
       {children}
     </div>
   );
