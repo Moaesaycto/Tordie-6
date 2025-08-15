@@ -21,7 +21,7 @@ type PanelDef = {
 
 const PANELS: Record<Panel, PanelDef> = {
   diagram: { label: "Diagram", component: DiagramPanel, icon: MdOutlineCreate, color: "#61b56a" },
-  document: { label: "Document", component: DocumentPanel, icon: FileTextIcon, color: "#c45050" },
+  document: { label: "Document", component: DocumentPanel, icon: FileTextIcon, color: "#d6765c" },
   export: { label: "Export", component: ExportPanel, icon: BiExport, color: "#5762db" },
 };
 
@@ -132,7 +132,7 @@ type PanelPageProps = { children: React.ReactNode };
 export const PanelPage = ({ children }: PanelPageProps) => {
   const fontSize = useFontSize();
   return (
-    <div className={`flex h-full min-h-0 flex-col w-full space-y-1 ${fontSize} gap-4 p-1 bg-accent `}>
+    <div className={`flex h-full min-h-0 flex-col w-full ${fontSize} gap-2 p-1 bg-accent `}>
       {children}
     </div>
   );
@@ -144,10 +144,11 @@ type InputRowProps = {
   title?: string;
   defaultValue?: string;
   placeholder?: string;
+  end?: React.ReactNode;
   onCommit: (e: string) => void;
 }
 
-export const InputRow = ({ label, title, defaultValue, placeholder, onCommit }: InputRowProps) => {
+export const InputRow = ({ label, title, defaultValue, placeholder, onCommit, end }: InputRowProps) => {
   const [draft, setDraft] = useState(defaultValue ?? "");
 
   const commit = () => {
@@ -173,9 +174,12 @@ export const InputRow = ({ label, title, defaultValue, placeholder, onCommit }: 
         }}
       />
       {title &&
-        <div title={title} className="ml-1">
-          <InfoIcon className="h-4 w-4" />
+        <div title={title} className="">
+          <InfoIcon className="h-4 w-6" />
         </div>
+      }
+      {end ??
+        end
       }
     </div>
   );
