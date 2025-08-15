@@ -142,45 +142,63 @@ export const PanelPage = ({ children }: PanelPageProps) => {
 type InputRowProps = {
   label: string;
   title?: string;
-  defaultValue?: string;
+  value?: string;                 // controlled
+  onChange?: (v: string) => void; // controlled
+  defaultValue?: string;          // uncontrolled fallback
   placeholder?: string;
   end?: React.ReactNode;
-  onCommit: (e: string) => void;
-}
+  onCommit: (v: string) => void;
+};
 
-export const InputRow = ({ label, title, defaultValue, placeholder, onCommit, end }: InputRowProps) => {
-  const [draft, setDraft] = useState(defaultValue ?? "");
+export const InputRow = ({
+  label,
+  title,
+  value,
+  onChange,
+  defaultValue,
+  placeholder,
+  onCommit,
+  end,
+}: InputRowProps) => {
+  const isControlled = value !== undefined;
+
+  // Uncontrolled internal state
+  const [internal, setInternal] = useState<string>(defaultValue ?? "");
+  useEffect(() => {
+    if (!isControlled) setInternal(defaultValue ?? "");
+  }, [defaultValue, isControlled]);
+
+  const draft = isControlled ? (value as string) : internal;
+
+  const handleChange = (v: string) => {
+    if (isControlled) onChange?.(v);
+    else setInternal(v);
+  };
 
   const commit = () => {
     const trimmed = draft.trim();
-    if (trimmed && trimmed !== (defaultValue ?? "")) {
-      onCommit(trimmed);
-    }
+    if (trimmed) onCommit(trimmed);
   };
 
   return (
-    <div className="flex items-center">
+    <div className="flex items-center overflow-hidden">
       <span className="basis-1/3 text-xs text-left">{label}</span>
       <Input
-        className="flex-1 h-full border-1 rounded-none focus-visible:ring-0 focus:outline-none px-2 text-xs sm:text-xs md:text-xs"
+        className="flex-1 h-full rounded-none focus-visible:ring-0 px-2 text-xs"
         value={draft}
         placeholder={placeholder}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => handleChange(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {
-          if (e.key === "Enter") {
-            e.currentTarget.blur();
-          }
+          if (e.key === "Enter") e.currentTarget.blur();
         }}
       />
-      {title &&
-        <div title={title} className="">
+      {title && (
+        <div title={title}>
           <InfoIcon className="h-4 w-6" />
         </div>
-      }
-      {end ??
-        end
-      }
+      )}
+      {end}
     </div>
   );
 };

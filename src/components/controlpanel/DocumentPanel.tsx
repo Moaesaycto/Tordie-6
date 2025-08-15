@@ -24,12 +24,13 @@ const DocumentPanel = () => {
       />
       <Separator className="my-3" />
       <InputRow
-        label="Color"
-        onCommit={(v) => {
-          setColor(v);
-        }}
-        defaultValue={color}
-        end={<ColorPopover value={color} onChange={setColor} presets={PRESETS} />}
+        label="Background"
+        value={color}
+        onChange={setColor}
+        onCommit={setColor}
+        end={<div className="rounded-r-lg overflow-hidden">
+          <ColorPopover value={color} onChange={setColor} presets={PRESETS} />
+        </div>}
       />
     </PanelPage>
   );
