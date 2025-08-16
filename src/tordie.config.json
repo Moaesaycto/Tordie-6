@@ -19,6 +19,8 @@
         "thickness": 20
     },
     "document": {
-        "default_name": "Untitled Project"
+        "default_name": "Untitled Project",
+        "default_light_background": "#F9FAFB",
+        "default_dark_background": "#161719" 
     }
 }

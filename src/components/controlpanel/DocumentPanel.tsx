@@ -2,6 +2,7 @@ import { Separator } from "@/components/ui/separator";
 import { useDocument } from "@/components/document-provider";
 import { InputRow, PanelPage } from "./ControlPanel";
 import { ColorPopover } from "@/components/main/ColorPopover";
+import Config from "@/tordie.config.json";
 
 const DocumentPanel = () => {
   const {
@@ -33,8 +34,8 @@ const DocumentPanel = () => {
               value={backgroundColor}
               onChange={setBackgroundColor}
               presets={[
-                "#F9FAFB", // light grey (default light)
-                "#161719", // near-black (default dark)
+                Config.document.default_light_background,
+                Config.document.default_dark_background,
               ]}
               locked={backgroundLocked}
               onToggleLock={() => setBackgroundLocked(v => !v)}

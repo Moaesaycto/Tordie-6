@@ -4,6 +4,7 @@ import config from "@/tordie.config.json";
 import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTheme } from "./theme-provider";
+import Config from "@/tordie.config.json";
 
 type ToolsRefs = {
   layerRef: React.RefObject<Konva.Layer | null>;
@@ -72,8 +73,8 @@ export function DocumentProvider({ children }: { children?: ReactNode }) {
       // Protects against changing a document color unless unlocked or a default for respective theme
       if (
         backgroundLocked || // Don't  change if locked
-        (isLightMode && backgroundColor.toLowerCase() === "#F9FAFB") || // Default light mode
-        (!isLightMode && backgroundColor.toLowerCase() === "#161719") // Default dark mode
+        (isLightMode && backgroundColor.toLowerCase() === Config.document.default_light_background) || // Default light mode
+        (!isLightMode && backgroundColor.toLowerCase() === Config.document.default_dark_background) // Default dark mode
       ) return;
       __setBackgroundColor(c);
       setDirty(true);
@@ -84,7 +85,7 @@ export function DocumentProvider({ children }: { children?: ReactNode }) {
   // sync theme -> background unless locked
   useEffect(() => {
     if (!backgroundLocked) {
-      __setBackgroundColor(resolvedTheme === "light" ? "#F9FAFB" : "#161719");
+      __setBackgroundColor(resolvedTheme === "light" ? Config.document.default_light_background : Config.document.default_dark_background);
     }
   }, [resolvedTheme, backgroundLocked]);
 
