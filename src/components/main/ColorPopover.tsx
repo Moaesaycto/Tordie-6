@@ -1,10 +1,10 @@
-import * as React from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+// import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { HexColorPicker } from "react-colorful";
 import { cn } from "@/lib/utils";
-import { normaliseHex, readableTextColour, toHex } from "@/lib/color";
+import { normaliseHex, readableTextColour } from "@/lib/color"; // toHex
 import { PencilIcon, LockIcon, UnlockIcon } from "lucide-react";
 
 type Props = {
@@ -24,20 +24,24 @@ export function ColorPopover({
   locked = false,
   onToggleLock,
   presets = [
-    "#111827", "#374151", "#6B7280", "#9CA3AF", "#D1D5DB", "#F9FAFB",
-    "#EF4444", "#F59E0B", "#FBBF24", "#10B981", "#3B82F6", "#8B5CF6",
-    "#EC4899", "#14B8A6", "#22D3EE", "#F97316"
+    "#F9FAFB", "#161719",
+    "#FFFFFF", "#F5F5F5", "#E5E7EB", "#D1D5DB",
+    "#FDF6E3", "#FFF8E1", "#FFFBEB",
+    "#F0F9FF", "#ECFDF5", "#FAF5FF", "#FCE7F3"
   ],
   className,
   side = "bottom",
   align = "end",
 }: Props) {
-  const [open, setOpen] = React.useState(false);
-  const [text, setText] = React.useState(value);
-  React.useEffect(() => setText(value), [value]);
+  const [open, setOpen] = useState(false);
+
+  const [text, setText] = useState(value);
+  void text; // left here for future use if input returns
+
+  useEffect(() => setText(value), [value]);
 
   // Only allow changes when unlocked.
-  const safeChange = React.useCallback(
+  const safeChange = useCallback(
     (hex: string) => {
       if (!locked) onChange(hex);
     },
@@ -77,11 +81,12 @@ export function ColorPopover({
         </button>
       </PopoverTrigger>
 
-      <PopoverContent side={side} align={align} className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="text-xs text-muted-foreground">Background colour</div>
+      {/* PopoverContent now hugs its content width */}
+      <PopoverContent side={side} align={align} className="inline-flex flex-col gap-2 rounded-xs w-auto">
+        {/* Lock toggle row */}
+        <div className="flex flex-row-reverse border-none items-center justify-between">
           <Button
-            className="w-6 h-6 rounded-sm"
+            className="w-6 h-6 rounded-none"
             type="button"
             variant={locked ? "destructive" : "outline"}
             size="sm"
@@ -92,47 +97,63 @@ export function ColorPopover({
           >
             {locked ? <LockIcon className="w-3 h-3" /> : <UnlockIcon className="w-3 h-3" />}
           </Button>
+
+          {/* Preview swatch */}
+          <div
+            className={cn(
+              "relative py-1 w-full flex-1 overflow-hidden rounded-xs border flex justify-center items-center",
+              locked && "opacity-90"
+            )}
+            style={{ backgroundColor: value }}
+          >
+            <span className="font-mono text-xs" style={{ color: readableTextColour(value) }}>
+              {value}
+            </span>
+            {locked && (
+              <div className="absolute inset-0 cursor-not-allowed" aria-hidden />
+            )}
+          </div>
         </div>
 
-        <div
-          className={cn(
-            "relative py-2 w-full flex-1 overflow-hidden rounded-sm border flex justify-center items-center",
-            locked && "opacity-90"
-          )}
-          style={{ backgroundColor: value }}
-        >
-          <span className="font-mono text-xs" style={{ color: readableTextColour(value) }}>
-            {value}
-          </span>
-          {locked && (
-            <div className="absolute inset-0 cursor-not-allowed" aria-hidden />
-          )}
-        </div>
-
+        {/* Picker + presets row – controls final width of popover */}
         <div
           data-color-picker
-          className={cn("w-full flex justify-center", locked && "pointer-events-none opacity-60")}
+          className={cn(
+            "flex justify-center items-start w-auto", // remove flex-1/w-full to hug content
+            locked && "pointer-events-none opacity-60"
+          )}
         >
-          <HexColorPicker color={value} onChange={(v) => safeChange(normaliseHex(v))} />
+          {/* Main picker */}
+          <div className="hex-color-picker">
+            <HexColorPicker
+              color={value}
+              onChange={(v) => safeChange(normaliseHex(v))}
+              // Force main region unrounded but keep selector handles untouched
+              className="!rounded-none [&_.react-colorful__saturation]:!rounded-none [&_.react-colorful__hue]:!rounded-none"
+            />
+          </div>
+
+          {/* Preset swatches */}
+          {presets.length > 0 && (
+            <div className={cn("flex flex-col items-center", locked && "opacity-60")}>
+              {presets.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  className="h-6 w-6 rounded-none border"
+                  style={{ backgroundColor: p }}
+                  onClick={() => safeChange(p)}
+                  aria-label={`Preset ${p}`}
+                  title={p}
+                  disabled={locked}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
-        {presets.length > 0 && (
-          <div className={cn("flex flex-wrap gap-1.5", locked && "opacity-60")}>
-            {presets.map((p) => (
-              <button
-                key={p}
-                type="button"
-                className="h-5 w-5 rounded-sm border"
-                style={{ backgroundColor: p }}
-                onClick={() => safeChange(p)}
-                aria-label={`Preset ${p}`}
-                title={p}
-                disabled={locked}
-              />
-            ))}
-          </div>
-        )}
-
+        {/* 
+        // Input + copy/done buttons (kept commented as original)
         <div className="flex items-center gap-2">
           <Input
             className="font-mono text-xs"
@@ -154,7 +175,8 @@ export function ColorPopover({
             Copy
           </Button>
           <Button size="sm" onClick={() => setOpen(false)}>Done</Button>
-        </div>
+        </div> 
+        */}
       </PopoverContent>
     </Popover>
   );

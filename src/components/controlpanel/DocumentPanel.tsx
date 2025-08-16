@@ -32,7 +32,10 @@ const DocumentPanel = () => {
             <ColorPopover
               value={backgroundColor}
               onChange={setBackgroundColor}
-              presets={["#F9FAFB", "#161719"]}
+              presets={[
+                "#F9FAFB", // light grey (default light)
+                "#161719", // near-black (default dark)
+              ]}
               locked={backgroundLocked}
               onToggleLock={() => setBackgroundLocked(v => !v)}
             />

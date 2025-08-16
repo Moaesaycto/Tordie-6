@@ -54,7 +54,7 @@ pub fn start_discord_presence() {
                 eprintln!("[RPC] Failed to set activity: {e}");
             }
 
-            thread::sleep(time::Duration::from_secs(10));
+            thread::sleep(time::Duration::from_secs(5));
         }
     });
 }
