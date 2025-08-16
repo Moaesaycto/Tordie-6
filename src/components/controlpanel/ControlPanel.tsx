@@ -184,7 +184,7 @@ export const InputRow = ({
     <div className="flex items-center overflow-hidden">
       <span className="basis-1/3 text-xs text-left">{label}</span>
       <Input
-        className="flex-1 h-full rounded-none focus-visible:ring-0 px-2 text-xs"
+        className="flex-1 h-full rounded-none focus-visible:ring-0 px-2 !text-xs"
         value={draft}
         placeholder={placeholder}
         onChange={(e) => handleChange(e.target.value)}

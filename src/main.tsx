@@ -14,11 +14,11 @@ createRoot(document.getElementById('root')!).render(
     <AppProvider>
       <StateProvider>
         <DiagramProvider>
-          <DocumentProvider>
-            <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+          <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+            <DocumentProvider>
               <App />
-            </ThemeProvider>
-          </DocumentProvider>
+            </DocumentProvider>
+          </ThemeProvider>
         </DiagramProvider>
       </StateProvider>
     </AppProvider>

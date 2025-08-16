@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, useState } from 'react';
 import { useSnapshot } from 'valtio';
 import { Stage, Layer, Circle, Rect, Transformer } from 'react-konva';
 import Konva from 'konva';
@@ -6,12 +6,20 @@ import { state } from '@/components/canvas/CanvasState';
 import { useApp } from '../app-provider';
 import { useViewportControls } from '@/components/hooks/viewport/useViewportControls';
 import { useDocument } from '@/components/document-provider';
+import { readableTextColour } from '@/lib/color';
 
 export default function Viewport() {
   const snap = useSnapshot(state);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
+
+  const { backgroundColor } = useDocument();
+  const [ selectBorderColor, setSelectBorderColor ] = useState<string>("#ffffff");
+
+  useEffect(() => {
+    setSelectBorderColor(readableTextColour(backgroundColor));
+  })
 
   const { setStage, tools: { layerRef, selRef, trRef } } = useDocument();
 
@@ -57,7 +65,7 @@ export default function Viewport() {
         x={snap.pan.x}
         y={snap.pan.y}
         style={{
-          background: '#f8f8f8',
+          background: backgroundColor,
           touchAction: 'none',
           cursor: snap.middlePanning ? 'grabbing' : 'default',
           display: 'block',
@@ -94,8 +102,7 @@ export default function Viewport() {
           <Rect
             ref={selRef}
             visible={false}
-            // fill="rgba(0,120,255,0.15)"
-            stroke="rgba(0,0,0,1)"
+            stroke={selectBorderColor}
             strokeWidth={1}
             dash={[4, 4]}
             strokeScaleEnabled={false}
