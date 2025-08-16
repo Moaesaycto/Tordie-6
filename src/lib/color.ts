@@ -86,5 +86,6 @@ export function parseColor(s: string): [number, number, number] {
       Math.round(b * a + 255 * (1 - a)),
     ];
   }
-  throw new Error("Unsupported colour format");
+  return [255, 255, 255] // If it is unsupported
+  // throw new Error("Unsupported colour format");
 }
