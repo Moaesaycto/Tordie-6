@@ -5,6 +5,8 @@ import { invoke } from "@tauri-apps/api/core";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { useTheme } from "./theme-provider";
 import Config from "@/tordie.config.json";
+import { UUID } from "@/types";
+import { v4 as uuidv4 } from 'uuid';
 
 type ToolsRefs = {
   layerRef: React.RefObject<Konva.Layer | null>;
@@ -29,6 +31,8 @@ type DocumentCtx = {
   // doc meta
   title: string;
   setTitle: (title: string) => void;
+  documentUUID: UUID;
+  setDocumentUUID: (uuid: UUID) => void;
   dirty: boolean;
   markDirty: () => void;
   markClean: () => void;
@@ -43,13 +47,15 @@ export function DocumentProvider({ children }: { children?: ReactNode }) {
     stageRef.current = stage;
   }, []);
 
+  
   // tool refs (shared across app)
   const layerRef = useRef<Konva.Layer | null>(null);
   const selRef = useRef<Konva.Rect | null>(null);
   const trRef = useRef<Konva.Transformer | null>(null);
-
+  
   // title/dirty
   const [title, _setTitle] = useState<string>(config.document.default_name);
+  const [documentUUID, setDocumentUUID] = useState<UUID>(uuidv4() as UUID);
   const [dirty, setDirty] = useState(false);
   const markDirty = useCallback(() => setDirty(true), []);
   const markClean = useCallback(() => setDirty(false), []);
@@ -123,6 +129,8 @@ export function DocumentProvider({ children }: { children?: ReactNode }) {
         setBackgroundColor,
         backgroundLocked,
         setBackgroundLocked,
+        documentUUID,
+        setDocumentUUID,
       }}
     >
       {children}

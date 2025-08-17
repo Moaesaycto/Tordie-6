@@ -55,7 +55,7 @@ export function ColorPopover({
           type="button"
           onClick={() => setOpen((o) => !o)}
           className={cn(
-            "group inline-flex items-center border bg-muted/30 shadow-sm overflow-visible rounded-sm",
+            "group inline-flex items-center border-y-2 border-r-2 border-l-none bg-muted/30 shadow-sm overflow-visible rounded-r-sm",
             className
           )}
           aria-label="Open colour picker"

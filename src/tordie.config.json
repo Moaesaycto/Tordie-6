@@ -1,4 +1,7 @@
 {
+    "application": {
+        "version": "6.0.1"
+    },
     "canvas": {
         "defaultWidth": 400,
         "defaultHeight": 500,

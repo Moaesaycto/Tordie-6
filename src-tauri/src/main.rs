@@ -6,6 +6,8 @@ use tauri::Manager;
 mod discord;
 use discord::{discord_update_project_name, start_discord_presence};
 
+mod td6;
+
 #[tauri::command]
 fn update_project_name(new_name: String) {
     discord_update_project_name(new_name);
@@ -23,7 +25,7 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .invoke_handler(tauri::generate_handler![update_project_name, test_command,])
+        .invoke_handler(tauri::generate_handler![update_project_name, test_command,td6::td6_save, td6::td6_load])
         .setup(|app| {
             println!("[App] Running setup...");
             start_discord_presence();

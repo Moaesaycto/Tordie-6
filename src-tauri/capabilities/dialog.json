@@ -1,0 +1,11 @@
+{
+    "identifier": "dialog:allow-open-confirm",
+    "description": "Enable file open + confirm dialogs on the main window",
+    "windows": [
+        "main"
+    ],
+    "permissions": [
+        "dialog:allow-open",
+        "dialog:allow-confirm"
+    ]
+}

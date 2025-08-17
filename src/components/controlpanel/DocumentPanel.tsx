@@ -3,6 +3,9 @@ import { useDocument } from "@/components/document-provider";
 import { InputRow, PanelPage } from "./ControlPanel";
 import { ColorPopover } from "@/components/main/ColorPopover";
 import Config from "@/tordie.config.json";
+import { Button } from "@/components/ui/button";
+import { useSave } from "@/services/save";
+import { useLoad } from "@/services/load";
 
 const DocumentPanel = () => {
   const {
@@ -13,6 +16,9 @@ const DocumentPanel = () => {
     backgroundLocked,
     setBackgroundLocked,
   } = useDocument();
+
+  const { save, saveAs } = useSave();
+  const { load } = useLoad();
 
   return (
     <PanelPage>
@@ -43,6 +49,9 @@ const DocumentPanel = () => {
           </div>
         }
       />
+      <Button onClick={save}>Save</Button>
+      <Button onClick={saveAs}>Save As</Button>
+      <Button onClick={load}>Open…</Button>
     </PanelPage>
   );
 };

@@ -50,7 +50,7 @@ export function ControlPanel() {
   const PanelComponent = PANELS[value].component;
 
   return (
-    <div ref={wrapperRef} className="flex flex-col w-full h-full overflow-hidden">
+    <div ref={wrapperRef} className="flex flex-col w-full h-full overflow-hidden border-l-2 ">
       <div ref={headerRef} className="shrink-0 border-b mt-1">
         <PanelSelect
           value={value}
@@ -132,7 +132,7 @@ type PanelPageProps = { children: React.ReactNode };
 export const PanelPage = ({ children }: PanelPageProps) => {
   const fontSize = useFontSize();
   return (
-    <div className={`flex h-full min-h-0 flex-col w-full ${fontSize} gap-2 p-1 bg-accent `}>
+    <div className={`flex h-full min-h-0 flex-col w-full ${fontSize} gap-2 p-1 bg-accent`}>
       {children}
     </div>
   );
@@ -142,12 +142,13 @@ export const PanelPage = ({ children }: PanelPageProps) => {
 type InputRowProps = {
   label: string;
   title?: string;
-  value?: string;                 // controlled
+  value?: string; // controlled
   onChange?: (v: string) => void; // controlled
-  defaultValue?: string;          // uncontrolled fallback
+  defaultValue?: string; // uncontrolled fallback
   placeholder?: string;
   end?: React.ReactNode;
   onCommit: (v: string) => void;
+  disabled?: boolean;
 };
 
 export const InputRow = ({
@@ -159,6 +160,7 @@ export const InputRow = ({
   placeholder,
   onCommit,
   end,
+  disabled,
 }: InputRowProps) => {
   const isControlled = value !== undefined;
 
@@ -192,6 +194,7 @@ export const InputRow = ({
         onKeyDown={(e) => {
           if (e.key === "Enter") e.currentTarget.blur();
         }}
+        disabled={disabled}
       />
       {title && (
         <div title={title}>
