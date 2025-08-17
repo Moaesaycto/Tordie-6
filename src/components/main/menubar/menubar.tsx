@@ -10,6 +10,9 @@ import { TextSize, Theme } from "@/types"
 import { formatKeyHint, useKeyHint } from "@/lib/format"
 import { CompactCheckboxItem, CompactContent, CompactItem, compactMenubarStyles, CompactRadioGroup, CompactSeparator, CompactSubContent, CompactSubTrigger, CompactTrigger } from "./compact-menubar-items"
 import { useAppState } from "@/components/state-provider"
+import { useLoad } from "@/services/load"
+import useSave from "@/services/save"
+import { useDocument } from "@/components/document-provider"
 
 export function HeaderMenubar() {
   return (
@@ -24,17 +27,42 @@ export function HeaderMenubar() {
 const FileMenu = () => {
   const modKey = useKeyHint()
   const { setCurrentState } = useAppState();
+  const { save, saveAs } = useSave();
+  const { load } = useLoad();
+  const { resetDocument } = useDocument();
+
 
   return (
     <MenubarMenu>
       <CompactTrigger>File</CompactTrigger>
       <CompactContent>
-        <CompactItem shortcut={formatKeyHint([modKey, "t"])}>
-          Example
+        <CompactItem
+          shortcut={formatKeyHint([modKey, "n"])}
+          onClick={resetDocument}
+        >
+          New
+        </CompactItem>
+        <CompactItem
+          shortcut={formatKeyHint([modKey, "o"])}
+          onClick={load}
+        >
+          Open...
         </CompactItem>
         <CompactSeparator />
         <CompactItem
-          shortcut={formatKeyHint([modKey, "t"])}
+          shortcut={formatKeyHint([modKey, "s"])}
+          onClick={save}
+        >
+          Save
+        </CompactItem>
+        <CompactItem
+          shortcut={formatKeyHint([modKey, "shift", "t"])}
+          onClick={saveAs}
+        >
+          Save As...
+        </CompactItem>
+        <CompactItem
+          shortcut={formatKeyHint([modKey, "e"])}
           onClick={() => {
             setCurrentState(prev => ({ ...prev, panelState: "export" }));
           }}

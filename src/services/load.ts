@@ -1,11 +1,11 @@
-// src/services/load.ts
 import { open as openDialog, confirm as confirmDialog } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import Config from "@/tordie.config.json";
 import { UUID } from "@/types";
 import { useDocument } from "@/components/document-provider";
+import { ToOrigin } from "@/components/viewport/ToOriginButton";
 
-/** Must match what you persist in save.ts */
+/* Must match what you persist in save.ts */
 export type SaveDoc = {
   version: string;
   documentUUID: UUID;
@@ -13,15 +13,13 @@ export type SaveDoc = {
   items: any[]; // extend when you wire items
 };
 
-/* ---------- IPC wrappers ---------- */
-
+/* IPC wrappers */
 async function loadTd6(path: string): Promise<SaveDoc> {
   console.log("[loadTd6] ←", path);
   return (await invoke("td6_load", { path })) as SaveDoc;
 }
 
-/* ---------- helpers ---------- */
-
+/* helpers */
 const MAJOR = (() => {
   const v = Config.application.version ?? "1.0.0";
   return Number.parseInt(String(v).split(".")[0] || "1", 10) || 1;
@@ -63,8 +61,7 @@ async function confirmProceed(message: string, title = "Confirm"): Promise<boole
   }
 }
 
-/* ---------- Public hook: prompts and hydrates context ---------- */
-
+/* Public hook: prompts and hydrates context */
 export function useLoad() {
   const {
     setTitle,
@@ -96,7 +93,7 @@ export function useLoad() {
     if (fileMajor !== MAJOR) {
       const proceed = await confirmProceed(
         `This file was created with schema v${fileMajor}.x, but this app is v${MAJOR}.x.\n` +
-          `Loading may be lossy or unsupported. Continue?`,
+        `Loading may be lossy or unsupported. Continue?`,
         "Schema version mismatch"
       );
       if (!proceed) {
@@ -126,13 +123,14 @@ export function useLoad() {
     rememberPath(doc.documentUUID, path);
 
     console.log("[useLoad.load] done");
+    ToOrigin();
     return doc;
   };
 
   return { load };
 }
 
-/* ---------- Non-hook utility: load a specific path and hydrate ---------- */
+/* Non-hook utility: load a specific path and hydrate */
 /** Use when you already have a path (e.g., recent files list). */
 export function useLoadAtPath() {
   const {
@@ -152,7 +150,7 @@ export function useLoadAtPath() {
     if (fileMajor !== MAJOR) {
       const proceed = await confirmProceed(
         `This file was created with schema v${fileMajor}.x, but this app is v${MAJOR}.x.\n` +
-          `Loading may be lossy or unsupported. Continue?`,
+        `Loading may be lossy or unsupported. Continue?`,
         "Schema version mismatch"
       );
       if (!proceed) throw new Error("Load aborted due to schema mismatch");

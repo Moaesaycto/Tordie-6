@@ -60,7 +60,6 @@ export function enableSelectMode({ stage, layer, sel, tr, ns }: SelectModeDeps):
     tr.nodes(selected);
     sel.visible(false);
     layer.batchDraw();
-    console.log(tr.nodes().length);
   };
 
   const onClick = (e: Konva.KonvaEventObject<MouseEvent>) => {

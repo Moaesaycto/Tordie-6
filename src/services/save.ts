@@ -1,4 +1,3 @@
-// src/services/useSave.ts
 import { useMemo } from "react";
 import { useDocument } from "@/components/document-provider";
 import { save as saveDialog, confirm as confirmDialog } from "@tauri-apps/plugin-dialog";
@@ -13,7 +12,6 @@ type SaveDoc = {
   items: any[]; // TODO: serialise your items
 };
 
-
 async function saveTd6(path: string, doc: SaveDoc) {
   console.log("[saveTd6] →", path, "uuid:", doc.documentUUID);
   const major = Number.parseInt(doc.version.split(".")[0] ?? "1", 10) || 1;
@@ -24,7 +22,6 @@ async function loadTd6(path: string): Promise<SaveDoc> {
   console.log("[loadTd6] ←", path);
   return (await invoke("td6_load", { path })) as SaveDoc;
 }
-
 
 const keyFor = (uuid: UUID) => `tordie:lastPath:${uuid}`;
 const safeFilename = (s: string) => (s || "Untitled").replace(/[\\/:*?"<>|]/g, "_").trim();
@@ -58,9 +55,8 @@ async function sameUuidOnDisk(path: string, uuid: UUID) {
   }
 }
 
-
 export function useSave() {
-  const { title, backgroundColor, documentUUID } = useDocument();
+  const { title, backgroundColor, documentUUID, markClean } = useDocument();
   const { version } = Config.application;
 
   const buildDoc = useMemo(
@@ -93,6 +89,7 @@ export function useSave() {
       if (ok) {
         console.log("[save] silent →", rememberedPath);
         await saveTd6(rememberedPath, doc);
+        markClean();
         return;
       }
       console.warn("[save] remembered mismatch → forget & Save As");
@@ -144,6 +141,7 @@ export function useSave() {
       console.log("[saveAs] saving →", path);
       await saveTd6(path, doc);
       console.log("[saveAs] done");
+      markClean();
     } catch (e) {
       console.warn("[saveAs] failed → forget", e);
       forget(doc.documentUUID);
