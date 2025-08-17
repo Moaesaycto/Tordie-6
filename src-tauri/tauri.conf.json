@@ -47,6 +47,17 @@
       "icons/macos/icon.icns",
       "icons/windows/icon.ico"
     ],
+    "fileAssociations": [
+      {
+        "ext": [
+          "td6"
+        ],
+        "name": "Tordie Document",
+        "description": "Tordie 6 project file",
+        "mimeType": "application/x-tordie-td6",
+        "role": "Editor"
+      }
+    ],
     "windows": {
       "nsis": {
         "sidebarImage": "icons/windows-installerSidebar.bmp",

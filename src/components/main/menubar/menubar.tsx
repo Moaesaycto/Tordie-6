@@ -35,7 +35,9 @@ const FileMenu = () => {
         <CompactSeparator />
         <CompactItem
           shortcut={formatKeyHint([modKey, "t"])}
-          onClick={() => {setCurrentState({panelState: 'export'})}}
+          onClick={() => {
+            setCurrentState(prev => ({ ...prev, panelState: "export" }));
+          }}
         >
           Export
         </CompactItem>
