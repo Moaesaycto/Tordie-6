@@ -1,21 +1,12 @@
 import { open as openDialog, confirm as confirmDialog } from "@tauri-apps/plugin-dialog";
 import { invoke } from "@tauri-apps/api/core";
 import Config from "@/tordie.config.json";
-import { UUID } from "@/types";
+import { SaveDoc, UUID } from "@/types";
 import { useDocument } from "@/components/document-provider";
 import { ToOrigin } from "@/components/viewport/ToOriginButton";
 
-/* Must match what you persist in save.ts */
-export type SaveDoc = {
-  version: string;
-  documentUUID: UUID;
-  backgroundColor: string;
-  items: any[]; // extend when you wire items
-};
-
 /* IPC wrappers */
 async function loadTd6(path: string): Promise<SaveDoc> {
-  console.log("[loadTd6] ←", path);
   return (await invoke("td6_load", { path })) as SaveDoc;
 }
 
@@ -29,7 +20,6 @@ const schemaMajor = (ver?: string) =>
 
 const keyFor = (uuid: UUID) => `tordie:lastPath:${uuid}`;
 const rememberPath = (uuid: UUID, path: string) => {
-  console.log("[rememberPath] uuid:", uuid, "→", path);
   localStorage.setItem(keyFor(uuid), path);
 };
 
@@ -38,25 +28,22 @@ const basenameNoExt = (p: string) => {
   return base.replace(/\.td6$/i, "");
 };
 
-/** File picker for .td6; returns path or undefined when cancelled. */
+
 async function pickTd6Path(): Promise<string | undefined> {
-  console.log("[pickTd6Path] opening file dialog…");
   const chosen = await openDialog({
     multiple: false,
     directory: false,
     filters: [{ name: "Tordie", extensions: ["td6"] }],
   });
   const path = Array.isArray(chosen) ? chosen[0] : chosen ?? undefined;
-  console.log("[pickTd6Path] chosen:", path);
   return path;
 }
 
-/** Confirm with Tauri permission fallback. */
+/* Confirm with Tauri permission fallback. */
 async function confirmProceed(message: string, title = "Confirm"): Promise<boolean> {
   try {
     return await confirmDialog(message, { title });
   } catch (e) {
-    console.warn("[confirmProceed] dialog.confirm not allowed; window.confirm fallback", e);
     return window.confirm(message);
   }
 }
@@ -72,16 +59,14 @@ export function useLoad() {
     markClean,
   } = useDocument();
 
-  /**
+  /*
    * Prompts user to pick a .td6 file, loads it, hydrates context, and
    * remembers the path for silent saves. Returns the loaded doc or undefined.
    */
   const load = async (): Promise<SaveDoc | undefined> => {
-    console.log("[useLoad.load] start");
 
     const path = await pickTd6Path();
     if (!path) {
-      console.log("[useLoad.load] cancelled");
       return undefined;
     }
 
@@ -89,7 +74,6 @@ export function useLoad() {
 
     // Version guard
     const fileMajor = schemaMajor(doc.version);
-    console.log("[useLoad.load] fileMajor:", fileMajor, "appMajor:", MAJOR);
     if (fileMajor !== MAJOR) {
       const proceed = await confirmProceed(
         `This file was created with schema v${fileMajor}.x, but this app is v${MAJOR}.x.\n` +
@@ -97,14 +81,12 @@ export function useLoad() {
         "Schema version mismatch"
       );
       if (!proceed) {
-        console.log("[useLoad.load] user declined load due to schema mismatch");
         return undefined;
       }
     }
 
     // Hydrate context
     const newTitle = basenameNoExt(path);
-    console.log("[useLoad.load] hydrating → title:", newTitle, "uuid:", doc.documentUUID);
 
     // Ensure we can set background even if locked; restore lock after.
     const wasLocked = backgroundLocked;
@@ -121,8 +103,6 @@ export function useLoad() {
 
     // Remember path for this UUID so Save() can be silent
     rememberPath(doc.documentUUID, path);
-
-    console.log("[useLoad.load] done");
     ToOrigin();
     return doc;
   };
@@ -143,7 +123,6 @@ export function useLoadAtPath() {
   } = useDocument();
 
   const loadAtPath = async (path: string): Promise<SaveDoc> => {
-    console.log("[useLoad.loadAtPath] start →", path);
     const doc = await loadTd6(path);
 
     const fileMajor = schemaMajor(doc.version);
@@ -169,7 +148,6 @@ export function useLoadAtPath() {
     }
 
     rememberPath(doc.documentUUID, path);
-    console.log("[useLoad.loadAtPath] done");
     return doc;
   };
 

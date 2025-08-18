@@ -32,3 +32,10 @@ type ModifierKey =
     | "cmd"
 
 export type UUID = string & { readonly __uuid: unique symbol };
+
+export type SaveDoc = {
+    version: string;
+    documentUUID: UUID;
+    backgroundColor: string;
+    items: any[];
+};
