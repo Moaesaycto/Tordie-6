@@ -39,7 +39,7 @@ type DocumentCtx = {
   markClean: () => void;
 
   // actions
-  resetDocument: () => void; // “New”
+  resetDocument: () => void;
 };
 
 const DocumentProviderContext = createContext<DocumentCtx | undefined>(undefined);
