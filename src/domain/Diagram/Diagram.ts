@@ -56,37 +56,6 @@ export class Diagram {
         name: "Line",
         visible: true,
       },
-      {
-        id: "3",
-        type: "circle",
-        name: "Circle",
-        visible: true,
-      },
-      {
-        id: "4",
-        type: "parametric",
-        name: "Parametric",
-        visible: true,
-      },
-      {
-        id: "5",
-        type: "group",
-        name: "Group",
-        children: [],
-        visible: true,
-      },
-      {
-        id: "6",
-        type: "tessellation",
-        name: "Tessellation",
-        visible: true,
-      },
-      {
-        id: "7",
-        type: "importedSvg",
-        name: "Imported SVG",
-        visible: true,
-      },
     ]
   }
 

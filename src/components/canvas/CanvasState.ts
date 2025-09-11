@@ -1,4 +1,20 @@
-import { proxy } from 'valtio'
+import { proxy } from "valtio";
+import { proxyMap } from "valtio/utils";
+import { Diagram } from "@/domain/Diagram/Diagram";
+import { Geometry, GeometryData, PointData } from "@/domain/Geometry/Geometry";
+import { Id } from "@/lib/objects";
+
+// helper to create a Diagram whose maps are reactive
+function makeDiagram() {
+  const d = new Diagram();
+  // @ts-expect-error intentional replacement with reactive maps
+  d.geoms = proxyMap(d.geoms);
+  // @ts-expect-error
+  d.items = proxyMap(d.items);
+  // @ts-expect-error
+  d.mods  = proxyMap(d.mods);
+  return d;
+}
 
 export const state = proxy({
   zoom: 1,
@@ -10,9 +26,62 @@ export const state = proxy({
   middlePanning: false,
   lastMouse: { x: 0, y: 0 },
   viewport: { width: 0, height: 0 },
-  document: {
-    width: 1000,
-    height: 1000
-  },
-  mode: 'select',
-})
+  document: { width: 1000, height: 1000 },
+  mode: "select",
+  selection: { itemId: null as Id | null },
+
+  // the reactive diagram lives here
+  diagram: makeDiagram(),
+});
+
+// --- loading: either replace the whole instance or mutate in place ---
+
+// A) Replace instance (simple)
+export function loadDiagramReplace(json: any) {
+  const d = makeDiagram();
+  // hydrate d from json...
+  // e.g. json.geoms.forEach(g => d.geoms.set(g.id, g));
+  d.invalidate();
+  state.diagram = d; // swap; subscribers update
+}
+
+// B) Mutate in place (preserve identity, selections)
+export function loadDiagramInPlace(json: any) {
+  const d = state.diagram;
+  d.items.clear(); d.geoms.clear(); d.mods.clear();
+  // hydrate in-place...
+  d.invalidate();
+}
+
+// geometry helpers bound to current diagram
+
+export function updatePoint(geomId: Id, xy: PointData) {
+  const d = state.diagram;
+  const g = d.geoms.get(geomId);
+  if (!g || g.payload.kind !== "point") return;
+  d.geoms.set(geomId, { ...g, payload: { kind: "point", data: xy } });
+  d.invalidate(/* TODO: fine-grained dirty */);
+}
+
+export function resolvePoint(ref: Id | PointData): PointData {
+  if (typeof ref === "string") {
+    const g = state.diagram.geoms.get(ref) as Geometry;
+    return (g.payload as GeometryData & { kind: "point" }).data as PointData;
+  }
+  return ref;
+}
+
+export function seedDiagramIfEmpty() {
+  const d = state.diagram;
+  if (d.geoms.size) return;                    // already populated
+
+  const p0 = d.createGeometry({ kind: "point", data: { x: 140, y: 160 } });
+  const p1 = d.createGeometry({ kind: "point", data: { x: 320, y: 240 } });
+  const L  = d.createGeometry({ kind: "line",  data: { p0, p1 } });
+
+  d.createItem({ name: "P0", geometry: p0 });
+  d.createItem({ name: "P1", geometry: p1 });
+  d.createItem({ name: "L",  geometry: L  });
+
+  d.invalidate();
+}
