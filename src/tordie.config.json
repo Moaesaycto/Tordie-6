@@ -17,14 +17,15 @@
             "dark": "#ffffff",
             "light": "#000000"
         },
-        "selectedStroke" : {
+        "selectedStroke": {
             "dark": "#debfff",
             "light": "#6756a0"
         },
-        "width" : 1,
+        "width": 1,
         "selectedWidth": 2,
         "radius": 1.5,
-        "selectedRadius": 3.5
+        "selectedRadius": 3.5,
+        "baseHit": 20
     },
     "ruler": {
         "majorLength": 10,
@@ -39,5 +40,8 @@
         "default_name": "Untitled Project",
         "default_light_background": "#F9FAFB",
         "default_dark_background": "#1e1e1f"
+    },
+    "modes": {
+        "drag_lasso_threshold": 4
     }
 }

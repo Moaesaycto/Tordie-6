@@ -3,9 +3,6 @@ import type { Geometry, GeometryData, PointData } from "@/domain/Geometry/Geomet
 import type { Id } from "@/lib/objects";
 import { state } from "@/components/canvas/CanvasState";
 
-const BASE_R = 6;
-const BASE_HIT = 20;
-
 export type GeometryStyle = {
   stroke: string,
   selectedStroke: string,
@@ -13,7 +10,13 @@ export type GeometryStyle = {
   selectedWidth: number,
   radius: number,
   selectedRadius: number,
+  baseHit: number,
 }
+
+const setCursor = (e: any, v: string) => {
+  const el = e?.target?.getStage()?.container();
+  if (el) el.style.cursor = v;
+};
 
 export type RenderCtx = {
   getGeom: (id: Id) => Geometry | undefined;
@@ -35,7 +38,6 @@ const pointSelectedViaLine = (ctx: RenderCtx, pointId: Id) => {
   return false;
 };
 
-
 export function renderLine(
   g: Geometry,
   ctx: RenderCtx,
@@ -56,9 +58,13 @@ export function renderLine(
       stroke={selected ? style.selectedStroke : style.stroke}
       strokeWidth={selected ? style.selectedWidth : style.width}
       strokeScaleEnabled={false}
-      hitStrokeWidth={Math.max(BASE_HIT / Math.max(zoom, 0.01), 1)}
+      hitStrokeWidth={Math.max(style.baseHit / Math.max(zoom, 0.01), 1)}
       attrs={{ geomId: g.id }}
       draggable
+      onMouseEnter={(e) => setCursor(e, "grab")}
+      onMouseLeave={(e) => setCursor(e, "default")}
+      onDragStart={(e) => setCursor(e, "grabbing")}
+      onDragEnd={(e) => setCursor(e, "grab")}
       onDragMove={(e) => {
         const stage = e.target.getStage();
         const scale = stage ? stage.scaleX() || 1 : 1;     // zoom
@@ -75,7 +81,8 @@ export function renderLine(
         }
 
         e.target.position({ x: 0, y: 0 }); // keep node anchored
-      }}
+      }
+      }
     />
   );
 }
@@ -102,12 +109,16 @@ export function renderPoint(
       y={y}
       radius={radius}
       draggable
+      onMouseEnter={(e) => setCursor(e, "pointer")}  // or "move" if you prefer
+      onMouseLeave={(e) => setCursor(e, "default")}
+      onDragStart={(e) => setCursor(e, "grabbing")}
+      onDragEnd={(e) => setCursor(e, "pointer")}
+      onDragMove={(e) => ctx.onPointMove(g.id as Id, e.target.position())}
       hitStrokeWidth={hit}
       stroke={selected ? style.selectedStroke : style.stroke}
       strokeWidth={1}
       strokeScaleEnabled={false} // 1px stroke stays 1px
       fill={selected ? style.selectedStroke : style.stroke}
-      onDragMove={(e) => ctx.onPointMove(g.id as Id, e.target.position())}
       attrs={{ geomId: g.id }}
     />
   );

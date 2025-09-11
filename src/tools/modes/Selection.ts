@@ -1,23 +1,29 @@
 import Konva from "konva";
-import { clearSelection, addSelect, toggleSelect, state, applySelection } from "@/components/canvas/CanvasState";
+import { state, applySelection } from "@/components/canvas/CanvasState";
 import type { Id } from "@/lib/objects";
 import { absScaleX, inflateRect, lineIntersectsRectWithTolerance, pointInRect } from "@/lib/math";
+import Config from "@/tordie.config.json";
 
 const geomIdOf = (n: Konva.Node): Id | null => (n.getAttr("geomId") as Id) ?? null;
 const selectable = (n: Konva.Node) => n.hasName("selectable");
+const dragLassoThreshold = () => Config.modes.drag_lasso_threshold ?? 4;
 
 type SelectModeDeps = {
   stage: Konva.Stage;
-  layer: Konva.Layer;
+  layer: Konva.Layer;     // kept for the rect; hit-testing uses stage
   sel: Konva.Rect;
-  ns: string; // e.g. '.selectTool'
+  ns: string;             // e.g. ".selectTool"
 };
 
 export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () => void {
-  let selecting = false;
+  void layer; // Unused for now
+
+  let selecting = false;      // we are in potential lasso interaction
+  let armed = false;          // armed but not visible until threshold
   let x1 = 0, y1 = 0;
 
   stage.container().style.cursor = "crosshair";
+
   const onWindowUp = () => selecting && onUp({ evt: { button: 0 } } as any);
   window.addEventListener("mouseup", onWindowUp);
 
@@ -32,82 +38,114 @@ export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () 
 
   const onDown = (e: Konva.KonvaEventObject<any>) => {
     if (!isPrimary(e)) return;
+
+    // If clicking a selectable node, DO NOT arm the lasso (user intends to drag/select that node)
+    if (e.target !== stage && selectable(e.target)) {
+      selecting = false;
+      armed = false;
+      sel.visible(false);
+      stage.batchDraw();
+      return;
+    }
+
     const p = scenePos(); if (!p) return;
     selecting = true;
+    armed = true; // will show after threshold
     x1 = p.x; y1 = p.y;
-    sel.setAttrs({ x: p.x, y: p.y, width: 0, height: 0, visible: true });
-    layer.batchDraw();
+
+    // start hidden; will become visible once user moves enough
+    sel.setAttrs({ x: p.x, y: p.y, width: 0, height: 0, visible: false });
+    stage.batchDraw();
   };
 
   const onMove = () => {
     if (!selecting) return;
     const p = scenePos(); if (!p) return;
+
+    const dx = p.x - x1;
+    const dy = p.y - y1;
+
+    // show the lasso only after a small movement
+    if (armed && Math.hypot(dx, dy) >= dragLassoThreshold()) {
+      sel.visible(true);
+      armed = false;
+    }
+
+    if (!sel.visible()) return;
+
     sel.setAttrs({
       x: Math.min(x1, p.x),
       y: Math.min(y1, p.y),
-      width: Math.abs(p.x - x1),
-      height: Math.abs(p.y - y1),
+      width: Math.abs(dx),
+      height: Math.abs(dy),
     });
-    layer.batchDraw();
+    stage.batchDraw();
   };
 
   const onUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (!selecting || !isPrimary(e)) return;
     selecting = false;
+    armed = false;
+
+    // If lasso never became visible, treat as click-on-empty handled elsewhere
+    if (!sel.visible()) {
+      sel.visible(false);
+      stage.batchDraw();
+      return;
+    }
 
     // selection rect in absolute (stage) coords
     const box = sel.getClientRect({ skipTransform: false });
 
-    // pick by actual geometry overlap
-    const hits = layer.find(".selectable").filter(n => {
-      if (n.getClassName() === "Line") {
+    // Hit-test across the entire stage (multiple layers supported)
+    const hits = stage.find(".selectable").filter(n => {
+      const cls = n.getClassName();
+      if (cls === "Line") {
         return lineIntersectsRectWithTolerance(n as Konva.Line, box, stage);
       }
-      // points / circles: center-in-rect (inflate by screen radius)
-      if (n.getClassName() === "Circle") {
+      if (cls === "Circle") {
+        // treat handle as centre-in-inflated-rect by screen radius
         const t = n.getAbsoluteTransform();
         const c = t.point({ x: (n as Konva.Circle).x(), y: (n as Konva.Circle).y() });
-        const rPx = (n as Konva.Circle).radius() * absScaleX(stage) * ((n as any).strokeScaleEnabled?.() === false ? 1 : 1);
-        // treat handles as a small square in screen space -> inflate rect in world space
+        const rPx = (n as Konva.Circle).radius() * absScaleX(stage);
         const worldTol = Math.max(4, rPx) / absScaleX(stage);
         const R = inflateRect(box, worldTol);
         return pointInRect(c.x, c.y, R);
       }
-      // default fallback: bbox
+      // fallback: bbox
       return Konva.Util.haveIntersection(box, n.getClientRect({ skipTransform: false }));
     });
 
     const ids = (hits as Konva.Node[])
-      .filter(n => n.hasName("selectable"))
-      .map(n => n.getAttr("geomId") as Id)
-      .filter(Boolean);
+      .filter(selectable)
+      .map(geomIdOf)
+      .filter((x): x is Id => !!x);
 
-    const { shiftKey, ctrlKey, metaKey } = e.evt;
-    const toggleKey = ctrlKey || metaKey;
-    if (!shiftKey && !toggleKey) clearSelection();
-    for (const id of ids) {
-      if (toggleKey) toggleSelect(id);
-      else addSelect(id);
-    }
-
+    // Expand + apply selection (line ↔ endpoints, shift/ctrl logic inside)
     applySelection(ids, e.evt);
 
     sel.visible(false);
-    layer.batchDraw();
+    stage.batchDraw();
   };
 
-
-  // ...
   const onClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (!isPrimary(e)) return;
+
+    // Click on empty stage clears selection
     if (e.target === stage || selecting) {
-      if (e.target === stage) { state.selection.clear(); layer.batchDraw(); }
+      if (e.target === stage) {
+        state.selection.clear();
+        stage.batchDraw();
+      }
       return;
     }
+
     if (!selectable(e.target)) return;
     const id = geomIdOf(e.target); if (!id) return;
-    applySelection([id], e.evt);   // expands line <-> points
-    layer.batchDraw();
+
+    // Click selection with expansion + modifiers
+    applySelection([id], e.evt);
+    stage.batchDraw();
   };
 
   sel.listening(false);
@@ -121,7 +159,7 @@ export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () 
   return () => {
     stage.off(ns);
     sel.visible(false);
-    layer.getStage()?.batchDraw();
+    stage.batchDraw();
     window.removeEventListener("mouseup", onWindowUp);
   };
 }

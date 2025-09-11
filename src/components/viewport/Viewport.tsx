@@ -23,6 +23,7 @@ export const style = (resolved?: string): GeometryStyle => {
     selectedWidth: g.selectedWidth,
     radius: g.radius,
     selectedRadius: g.selectedRadius,
+    baseHit: g.baseHit,
   };
 };
 
