@@ -43,10 +43,12 @@ export function useViewportControls(
     };
 
     const onMouseMove = (e: MouseEvent) => {
-      if (!activeRef.current && !state.middlePanning && !state.dragging) return;
-
+      // always update cursor coords in screen space
       const { x, y } = getCanvasPoint(e);
       setViewportCursorCoords({ x, y });
+
+      // only run interaction logic when dragging or panning
+      if (!activeRef.current && !state.middlePanning && !state.dragging) return;
 
       if (state.middlePanning) {
         const dx = e.clientX - state.lastMouse.x;
@@ -90,7 +92,7 @@ export function useViewportControls(
     };
 
     container.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mousemove", onMouseMove); // always fires
     window.addEventListener("mouseup", onMouseUp);
     container.addEventListener("mouseleave", onMouseLeave);
     container.addEventListener("wheel", onWheel, { passive: false });

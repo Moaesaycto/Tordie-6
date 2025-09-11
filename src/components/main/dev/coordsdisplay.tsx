@@ -12,9 +12,9 @@ const CoordsDisplay = () => {
   const rel =
     viewportCursorCoords && snap.zoom !== 0
       ? {
-          x: (viewportCursorCoords.x - snap.pan.x) / snap.zoom,
-          y: (viewportCursorCoords.y - snap.pan.y) / snap.zoom,
-        }
+        x: (viewportCursorCoords.x - snap.pan.x) / snap.zoom,
+        y: (viewportCursorCoords.y - snap.pan.y) / snap.zoom,
+      }
       : { x: null, y: null };
 
   return (

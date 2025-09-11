@@ -1,5 +1,5 @@
 import { proxy } from "valtio";
-import { proxyMap } from "valtio/utils";
+import { proxyMap, proxySet } from "valtio/utils";
 import { Diagram } from "@/domain/Diagram/Diagram";
 import { Geometry, GeometryData, PointData } from "@/domain/Geometry/Geometry";
 import { Id } from "@/lib/objects";
@@ -12,7 +12,7 @@ function makeDiagram() {
   // @ts-expect-error
   d.items = proxyMap(d.items);
   // @ts-expect-error
-  d.mods  = proxyMap(d.mods);
+  d.mods = proxyMap(d.mods);
   return d;
 }
 
@@ -28,13 +28,25 @@ export const state = proxy({
   viewport: { width: 0, height: 0 },
   document: { width: 1000, height: 1000 },
   mode: "select",
-  selection: { itemId: null as Id | null },
-
-  // the reactive diagram lives here
+  selection: proxySet<Id>(),
   diagram: makeDiagram(),
 });
 
-// --- loading: either replace the whole instance or mutate in place ---
+export const clearSelection = () => state.selection.clear();
+export const selectOnly = (id: Id) => { state.selection.clear(); state.selection.add(id); };
+export const addSelect = (id: Id) => { state.selection.add(id); };
+export const toggleSelect = (id: Id) => {
+  if (state.selection.has(id)) state.selection.delete(id);
+  else state.selection.add(id);
+};
+
+export function handleSelectClick(id: Id, evt: MouseEvent) {
+  const { shiftKey, ctrlKey, metaKey } = evt;
+  const toggleKey = ctrlKey || metaKey;
+  if (toggleKey) toggleSelect(id);
+  else if (shiftKey) addSelect(id);
+  else selectOnly(id);
+}
 
 // A) Replace instance (simple)
 export function loadDiagramReplace(json: any) {
@@ -77,11 +89,11 @@ export function seedDiagramIfEmpty() {
 
   const p0 = d.createGeometry({ kind: "point", data: { x: 140, y: 160 } });
   const p1 = d.createGeometry({ kind: "point", data: { x: 320, y: 240 } });
-  const L  = d.createGeometry({ kind: "line",  data: { p0, p1 } });
+  const L = d.createGeometry({ kind: "line", data: { p0, p1 } });
 
   d.createItem({ name: "P0", geometry: p0 });
   d.createItem({ name: "P1", geometry: p1 });
-  d.createItem({ name: "L",  geometry: L  });
+  d.createItem({ name: "L", geometry: L });
 
   d.invalidate();
 }

@@ -2,55 +2,29 @@ import { useRef, useEffect, useCallback, useState } from 'react';
 import { useSnapshot } from 'valtio';
 import { Stage, Layer, Circle, Rect, Transformer } from 'react-konva';
 import Konva from 'konva';
-import { seedDiagramIfEmpty, state } from '@/components/canvas/CanvasState';
+import { seedDiagramIfEmpty, state, updatePoint } from '@/components/canvas/CanvasState';
 import { useApp } from '@/components/app-provider';
 import { useViewportControls } from '@/components/hooks/viewport/useViewportControls';
 import { useDocument } from '@/components/document-provider';
 import { readableTextColour } from '@/lib/color';
-import { Line as KLine } from 'react-konva';
-import type { Geometry, GeometryData, PointData } from '@/domain/Geometry/Geometry';
-import type { Id } from '@/lib/objects';
-import { updatePoint } from '@/components/canvas/CanvasState';
+import type { Geometry } from '@/domain/Geometry/Geometry';
+import { RenderCtx, renderGeometry } from '@/components/canvas/geometryRenderers';
+import Config from "@/tordie.config.json";
+import { useTheme } from '@/components/theme-provider';
 
+const strokeFor = (resolved?: string) =>
+  Config.geometry.stroke[resolved === "dark" ? "dark" : "light"];
 
-const resolvePoint = (getGeom: (id: Id) => Geometry | undefined, ref: Id | PointData): PointData =>
-  typeof ref === "string"
-    ? ((getGeom(ref)?.payload as GeometryData & { kind: "point" })?.data ?? { x: 0, y: 0 })
-    : ref;
+export function DiagramLayer({ geoms, ctx }: { geoms: Geometry[]; ctx: RenderCtx }) {
+  const { resolvedTheme } = useTheme();
+  const stroke = strokeFor(resolvedTheme); // updates automatically when theme changes
+  const ui = useSnapshot(state);
+  const rawZoom = ui?.zoom;
+  const zoom = Number.isFinite(rawZoom as number) && (rawZoom as number) > 0
+    ? (rawZoom as number)
+    : 1; // safe fallback
 
-function DiagramLayer() {
-  const dSnap = useSnapshot(state.diagram);
-  const geoms = Array.from(dSnap.geoms.values());
-  const points = geoms.filter(g => g.payload.kind === "point");
-  const lines = geoms.filter(g => g.payload.kind === "line");
-
-  return (
-    <>
-      {lines.map(L => {
-        const { p0, p1 } = (L.payload as any).data;
-        const a = resolvePoint(id => dSnap.geoms.get(id), p0);
-        const b = resolvePoint(id => dSnap.geoms.get(id), p1);
-        return <KLine key={L.id} name="selectable" points={[a.x, a.y, b.x, b.y]} stroke="black" strokeWidth={2} />;
-      })}
-      {points.map(P => {
-        const { x, y } = (P.payload as any).data as PointData;
-        return (
-          <Circle
-            key={P.id}
-            name="selectable"
-            x={x}
-            y={y}
-            radius={6}
-            draggable
-            hitStrokeWidth={20}
-            stroke="black"
-            fill="white"
-            onDragMove={(e) => updatePoint(P.id as Id, e.target.position())}
-          />
-        );
-      })}
-    </>
-  );
+  return <>{geoms.map(g => renderGeometry(g, ctx, stroke, zoom))}</>;
 }
 
 export default function Viewport() {
@@ -102,6 +76,13 @@ export default function Viewport() {
     return () => observer.disconnect();
   }, [setViewportWidth, setViewportHeight]);
 
+  const dSnap = useSnapshot(state.diagram);                 // subscribe to diagram
+  const geoms = Array.from(dSnap.geoms.values());           // Geometry[]
+  const ctx: RenderCtx = {
+    getGeom: (id) => dSnap.geoms.get(id),
+    onPointMove: (id, xy) => updatePoint(id, xy),
+  };
+
   return (
     <div ref={wrapperRef} className="flex flex-col min-w-0 min-h-0 w-full h-full">
       <Stage
@@ -147,7 +128,7 @@ export default function Viewport() {
           />
 
           {/* render from the Diagram domain */}
-          <DiagramLayer />
+          <DiagramLayer geoms={geoms} ctx={ctx} />
         </Layer>
 
         <Layer listening={false}>
