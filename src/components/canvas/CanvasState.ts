@@ -97,3 +97,51 @@ export function seedDiagramIfEmpty() {
 
   d.invalidate();
 }
+
+export function expandSelection(ids: Id[], geoms = state.diagram.geoms): Set<Id> {
+  const out = new Set<Id>(ids);
+  for (const id of ids) {
+    const g = geoms.get(id);
+    if (!g) continue;
+
+    if (g.payload.kind === "line") {
+      const { p0, p1 } = g.payload.data as { p0: Id | any; p1: Id | any };
+      if (typeof p0 === "string") out.add(p0);
+      if (typeof p1 === "string") out.add(p1);
+    }
+
+    if (g.payload.kind === "point") {
+      for (const L of geoms.values()) {
+        if (L.payload.kind !== "line") continue;
+        const { p0, p1 } = L.payload.data as { p0: Id | any; p1: Id | any };
+        if (p0 === id || p1 === id) {
+          out.add(L.id);
+          if (typeof p0 === "string") out.add(p0);
+          if (typeof p1 === "string") out.add(p1);
+        }
+      }
+    }
+  }
+  return out;
+}
+
+export function applySelection(baseIds: Id[], evt?: MouseEvent) {
+  const ids = Array.from(expandSelection(baseIds));
+  const toggleKey = !!(evt?.ctrlKey || evt?.metaKey);
+  const shiftKey = !!evt?.shiftKey;
+
+  if (!shiftKey && !toggleKey) {
+    state.selection.clear();
+    ids.forEach(id => state.selection.add(id));
+    return;
+  }
+  if (toggleKey) {
+    ids.forEach(id => {
+      if (state.selection.has(id)) state.selection.delete(id);
+      else state.selection.add(id);
+    });
+    return;
+  }
+  // shift-add
+  ids.forEach(id => state.selection.add(id));
+}

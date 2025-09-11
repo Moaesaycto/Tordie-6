@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { clearSelection, addSelect, toggleSelect, handleSelectClick } from "@/components/canvas/CanvasState";
+import { clearSelection, addSelect, toggleSelect, handleSelectClick, state, applySelection } from "@/components/canvas/CanvasState";
 import type { Id } from "@/lib/objects";
 import { absScaleX, inflateRect, lineIntersectsRectWithTolerance, pointInRect } from "@/lib/math";
 
@@ -90,20 +90,23 @@ export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () 
       else addSelect(id);
     }
 
+    applySelection(ids, e.evt);
+
     sel.visible(false);
     layer.batchDraw();
   };
 
 
+  // ...
   const onClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (!isPrimary(e)) return;
     if (e.target === stage || selecting) {
-      if (e.target === stage) { clearSelection(); layer.batchDraw(); }
+      if (e.target === stage) { state.selection.clear(); layer.batchDraw(); }
       return;
     }
     if (!selectable(e.target)) return;
     const id = geomIdOf(e.target); if (!id) return;
-    handleSelectClick(id, e.evt); // ctrl/cmd toggles; shift adds; plain singles
+    applySelection([id], e.evt);   // expands line <-> points
     layer.batchDraw();
   };
 
