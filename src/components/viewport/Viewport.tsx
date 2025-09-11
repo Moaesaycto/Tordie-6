@@ -8,23 +8,34 @@ import { useViewportControls } from '@/components/hooks/viewport/useViewportCont
 import { useDocument } from '@/components/document-provider';
 import { readableTextColour } from '@/lib/color';
 import type { Geometry } from '@/domain/Geometry/Geometry';
-import { RenderCtx, renderGeometry } from '@/components/canvas/geometryRenderers';
+import { GeometryStyle, RenderCtx, renderGeometry } from '@/components/canvas/geometryRenderers';
 import Config from "@/tordie.config.json";
 import { useTheme } from '@/components/theme-provider';
 
-const strokeFor = (resolved?: string) =>
-  Config.geometry.stroke[resolved === "dark" ? "dark" : "light"];
+export const style = (resolved?: string): GeometryStyle => {
+  const theme = resolved === "dark" ? "dark" : "light";
+  const g = Config.geometry;
+
+  return {
+    stroke: g.stroke[theme],
+    selectedStroke: g.selectedStroke[theme],
+    width: g.width,
+    selectedWidth: g.selectedWidth,
+    radius: g.radius,
+    selectedRadius: g.selectedRadius,
+  };
+};
 
 export function DiagramLayer({ geoms, ctx }: { geoms: Geometry[]; ctx: RenderCtx }) {
   const { resolvedTheme } = useTheme();
-  const stroke = strokeFor(resolvedTheme); // updates automatically when theme changes
+
   const ui = useSnapshot(state);
   const rawZoom = ui?.zoom;
   const zoom = Number.isFinite(rawZoom as number) && (rawZoom as number) > 0
     ? (rawZoom as number)
     : 1; // safe fallback
 
-  return <>{geoms.map(g => renderGeometry(g, ctx, stroke, zoom))}</>;
+  return <>{geoms.map(g => renderGeometry(g, ctx, style(resolvedTheme), zoom))}</>;
 }
 
 export default function Viewport() {

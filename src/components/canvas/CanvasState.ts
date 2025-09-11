@@ -50,6 +50,7 @@ export function handleSelectClick(id: Id, evt: MouseEvent) {
 
 // A) Replace instance (simple)
 export function loadDiagramReplace(json: any) {
+  void json // FIXME: Actually implement this
   const d = makeDiagram();
   // hydrate d from json...
   // e.g. json.geoms.forEach(g => d.geoms.set(g.id, g));
@@ -59,6 +60,7 @@ export function loadDiagramReplace(json: any) {
 
 // B) Mutate in place (preserve identity, selections)
 export function loadDiagramInPlace(json: any) {
+  void json // FIXME: Actually implement this
   const d = state.diagram;
   d.items.clear(); d.geoms.clear(); d.mods.clear();
   // hydrate in-place...
@@ -85,14 +87,12 @@ export function resolvePoint(ref: Id | PointData): PointData {
 
 export function seedDiagramIfEmpty() {
   const d = state.diagram;
-  if (d.geoms.size) return;                    // already populated
+  if (d.geoms.size) return; // already populated
 
   const p0 = d.createGeometry({ kind: "point", data: { x: 140, y: 160 } });
   const p1 = d.createGeometry({ kind: "point", data: { x: 320, y: 240 } });
   const L = d.createGeometry({ kind: "line", data: { p0, p1 } });
 
-  d.createItem({ name: "P0", geometry: p0 });
-  d.createItem({ name: "P1", geometry: p1 });
   d.createItem({ name: "L", geometry: L });
 
   d.invalidate();

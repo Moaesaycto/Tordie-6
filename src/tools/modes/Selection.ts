@@ -1,5 +1,5 @@
 import Konva from "konva";
-import { clearSelection, addSelect, toggleSelect, handleSelectClick, state, applySelection } from "@/components/canvas/CanvasState";
+import { clearSelection, addSelect, toggleSelect, state, applySelection } from "@/components/canvas/CanvasState";
 import type { Id } from "@/lib/objects";
 import { absScaleX, inflateRect, lineIntersectsRectWithTolerance, pointInRect } from "@/lib/math";
 

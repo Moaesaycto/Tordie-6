@@ -6,6 +6,15 @@ import { state } from "@/components/canvas/CanvasState";
 const BASE_R = 6;
 const BASE_HIT = 20;
 
+export type GeometryStyle = {
+  stroke: string,
+  selectedStroke: string,
+  width: number,
+  selectedWidth: number,
+  radius: number,
+  selectedRadius: number,
+}
+
 export type RenderCtx = {
   getGeom: (id: Id) => Geometry | undefined;
   onPointMove: (id: Id, xy: PointData) => void;
@@ -16,68 +25,105 @@ const resolvePoint = (ctx: RenderCtx, ref: Id | PointData): PointData =>
     ? ((ctx.getGeom(ref)?.payload as GeometryData & { kind: "point" })!.data)
     : ref;
 
-const isPointSelectedByLine = (ctx: RenderCtx, pointId: Id): boolean => {
+const pointSelectedViaLine = (ctx: RenderCtx, pointId: Id) => {
+  void ctx;
   for (const g of state.diagram.geoms.values()) {
     if (g.payload.kind !== "line") continue;
     const { p0, p1 } = g.payload.data as { p0: Id; p1: Id };
-    if (state.selection.has(g.id) && (p0 === pointId || p1 === pointId)) {
-      return true;
-    }
+    if (state.selection.has(g.id) && (p0 === pointId || p1 === pointId)) return true;
   }
   return false;
 };
 
-export const renderGeometry = (
+
+export function renderLine(
   g: Geometry,
   ctx: RenderCtx,
-  stroke: string,
+  style: GeometryStyle,
   zoom: number
-) => {
-  const { kind, data } = g.payload as any;
-  switch (kind) {
-    case "point": {
-      const { x, y } = data as PointData;
-      const selected = state.selection.has(g.id) || isPointSelectedByLine(ctx, g.id);
-      const radius = selected ? Math.max((BASE_R * 1.5) / zoom, 2) : Math.max(BASE_R / zoom, 1);
+) {
+  const { p0, p1 } = (g.payload as any).data;
+  const a = resolvePoint(ctx, p0);
+  const b = resolvePoint(ctx, p1);
 
-      return (
-        <Circle
-          key={g.id}
-          name="selectable"
-          x={x}
-          y={y}
-          radius={radius}
-          draggable
-          hitStrokeWidth={BASE_HIT / zoom}
-          stroke={selected ? "blue" : stroke}
-          strokeWidth={1}
-          strokeScaleEnabled={false}
-          fill={selected ? "blue" : "white"}
-          onDragMove={(e) => ctx.onPointMove(g.id as Id, e.target.position())}
-          attrs={{ geomId: g.id }}
-        />
-      );
-    }
+  const selected = state.selection.has(g.id);
 
-    case "line": {
-      const { p0, p1 } = data;
-      const a = resolvePoint(ctx, p0);
-      const b = resolvePoint(ctx, p1);
-      return (
-        <KLine
-          key={g.id}
-          name="selectable"
-          points={[a.x, a.y, b.x, b.y]}
-          stroke={state.selection.has(g.id) ? "blue" : stroke}
-          strokeWidth={2}
-          strokeScaleEnabled={false}
-          hitStrokeWidth={BASE_HIT / zoom}
-          attrs={{ geomId: g.id }}
-        />
-      );
-    }
+  return (
+    <KLine
+      key={g.id}
+      name="selectable"
+      points={[a.x, a.y, b.x, b.y]}
+      stroke={selected ? style.selectedStroke : style.stroke}
+      strokeWidth={selected ? style.selectedWidth : style.width}
+      strokeScaleEnabled={false}
+      hitStrokeWidth={Math.max(BASE_HIT / Math.max(zoom, 0.01), 1)}
+      attrs={{ geomId: g.id }}
+      draggable
+      onDragMove={(e) => {
+        const stage = e.target.getStage();
+        const scale = stage ? stage.scaleX() || 1 : 1;     // zoom
+        const dx = e.evt.movementX / scale;
+        const dy = e.evt.movementY / scale;
 
-    default:
-      return null;
+        const line = ctx.getGeom(g.id)!;
+        const { p0, p1 } = (line.payload as any).data;
+        if (typeof p0 === "string" && typeof p1 === "string") {
+          const P0 = (ctx.getGeom(p0)!.payload as any).data as PointData;
+          const P1 = (ctx.getGeom(p1)!.payload as any).data as PointData;
+          ctx.onPointMove(p0, { x: P0.x + dx, y: P0.y + dy });
+          ctx.onPointMove(p1, { x: P1.x + dx, y: P1.y + dy });
+        }
+
+        e.target.position({ x: 0, y: 0 }); // keep node anchored
+      }}
+    />
+  );
+}
+
+export function renderPoint(
+  g: Geometry,
+  ctx: RenderCtx,
+  style: GeometryStyle,
+  zoom: number
+) {
+  const { x, y } = (g.payload as any).data as PointData;
+  const selected = state.selection.has(g.id) || pointSelectedViaLine(ctx, g.id);
+
+  const z = Math.max(Number.isFinite(zoom) ? zoom : 1, 0.01);
+  const baseR = Number(selected ? style.selectedRadius : style.radius) || 6; // from config
+  const radius = baseR / z;                             // screen-fixed size
+  const hit = Math.max((baseR * 3) / z, 6);             // comfy hit area
+
+  return (
+    <Circle
+      key={g.id}
+      name="selectable"
+      x={x}
+      y={y}
+      radius={radius}
+      draggable
+      hitStrokeWidth={hit}
+      stroke={selected ? style.selectedStroke : style.stroke}
+      strokeWidth={1}
+      strokeScaleEnabled={false} // 1px stroke stays 1px
+      fill={selected ? style.selectedStroke : style.stroke}
+      onDragMove={(e) => ctx.onPointMove(g.id as Id, e.target.position())}
+      attrs={{ geomId: g.id }}
+    />
+  );
+}
+
+
+// Optional registry if you want a single entry point
+export function renderGeometry(
+  g: Geometry,
+  ctx: RenderCtx,
+  style: GeometryStyle,
+  zoom: number
+) {
+  switch ((g.payload as any).kind) {
+    case "line": return renderLine(g, ctx, style, zoom);
+    case "point": return renderPoint(g, ctx, style, zoom);
+    default: return null;
   }
-};
+}
