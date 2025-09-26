@@ -7,7 +7,6 @@ import { nodeRectScene, scenePoint, toScene } from "@/lib/scene";
 import { ensureDebugLayer, clearDebug, drawRect, drawDot } from "@/components/debug/DebugLayer";
 
 const DEBUG = Config.modes.debug_select;
-let __dbgClicks = 0;
 
 const geomIdOf = (n: Konva.Node): Id | null => (n.getAttr("geomId") as Id | undefined) ?? null;
 const selectable = (n: Konva.Node) => n.hasName("selectable");
@@ -61,12 +60,28 @@ export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () 
   const onUp = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (!selecting || !isPrimary(e)) return;
 
+    state.selection.clear()
+
     const wasVisible = sel.visible();
-    selecting = false; armed = false;
+    selecting = false;
+    armed = false;
 
-    if (!wasVisible) { sel.visible(false); stage.batchDraw(); return; }
+    if (!wasVisible) {
+      // No lasso → allow the Stage click to go through and clear selection
+      suppressClickOnce = false;
+      if (cancelClickFallback) { clearTimeout(cancelClickFallback); cancelClickFallback = null; }
+      sel.visible(false);
+      stage.batchDraw();
+      return;
+    }
 
-    const box = { x: Math.min(x1, x2), y: Math.min(y1, y2), width: Math.abs(x2 - x1), height: Math.abs(y2 - y1) };
+    // Lasso path (unchanged)
+    const box = {
+      x: Math.min(x1, x2),
+      y: Math.min(y1, y2),
+      width: Math.abs(x2 - x1),
+      height: Math.abs(y2 - y1),
+    };
 
     if (DEBUG) {
       const dbg = ensureDebugLayer(stage);
@@ -80,48 +95,38 @@ export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () 
 
     const hits = stage.find(".selectable").filter(n => {
       const cls = n.getClassName();
-
       if (cls === "Line") return hitTestLine(n as Konva.Line, box, stage, DEBUG);
       if (cls === "Circle") return hitTestCircle(n as Konva.Circle, box, stage, DEBUG);
-
-      // generic fallback: bbox vs lasso in scene space
       return Konva.Util.haveIntersection(box, nodeRectScene(n, stage));
     });
 
-    const ids = (hits as Konva.Node[]).filter(selectable).map(geomIdOf).filter((x): x is Id => !!x);
+    const ids = (hits as Konva.Node[])
+      .filter(selectable)
+      .map(geomIdOf)
+      .filter((x): x is Id => !!x);
+
     applySelection(ids, e.evt);
     sel.visible(false);
     stage.batchDraw();
   };
 
+
   const onClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     if (!isPrimary(e)) return;
 
-    if (DEBUG) console.log("CLICK", ++__dbgClicks, { suppressClickOnce });
-
+    // swallow the synthetic click after a lasso
     if (suppressClickOnce) {
       suppressClickOnce = false;
       if (cancelClickFallback) { clearTimeout(cancelClickFallback); cancelClickFallback = null; }
       e.cancelBubble = true;
-      if (DEBUG) console.log("CLICK suppressed");
-      return;
-    }
-
-    if (e.target === stage) { // clear on empty
-      if (DEBUG) console.log("CLICK empty-stage -> clear");
-      state.selection.clear(); stage.batchDraw(); return;
-    }
-
-    if (!selectable(e.target)) {
-      if (DEBUG) console.log("CLICK non-selectable ignored", e.target.getClassName());
       return;
     }
 
     const id = geomIdOf(e.target); if (!id) return;
-    if (DEBUG) console.log("CLICK node -> applySelection", id);
     applySelection([id], e.evt);
     stage.batchDraw();
   };
+
 
   const onWindowUp = () => {
     if (!selecting) return;
