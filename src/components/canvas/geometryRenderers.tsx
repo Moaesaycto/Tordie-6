@@ -1,7 +1,11 @@
 import { Line as KLine, Circle } from "react-konva";
 import type { Geometry, GeometryData, PointData } from "@/domain/Geometry/Geometry";
 import type { Id } from "@/lib/objects";
-import { state } from "@/components/canvas/CanvasState";
+import { selectedPointIds, selectOnly, state } from "@/components/canvas/CanvasState";
+import { KonvaEventObject } from "konva/lib/Node";
+import Config from "@/tordie.config.json";
+import { pointSelectedViaLine } from "@/tools/modes/Selection";
+import { setCursor } from "@/lib/utils";
 
 export type GeometryStyle = {
   stroke: string,
@@ -13,11 +17,6 @@ export type GeometryStyle = {
   baseHit: number,
 }
 
-const setCursor = (e: any, v: string) => {
-  const el = e?.target?.getStage()?.container();
-  if (el) el.style.cursor = v;
-};
-
 export type RenderCtx = {
   getGeom: (id: Id) => Geometry | undefined;
   onPointMove: (id: Id, xy: PointData) => void;
@@ -28,15 +27,19 @@ const resolvePoint = (ctx: RenderCtx, ref: Id | PointData): PointData =>
     ? ((ctx.getGeom(ref)?.payload as GeometryData & { kind: "point" })!.data)
     : ref;
 
-const pointSelectedViaLine = (ctx: RenderCtx, pointId: Id) => {
-  void ctx;
-  for (const g of state.diagram.geoms.values()) {
-    if (g.payload.kind !== "line") continue;
-    const { p0, p1 } = g.payload.data as { p0: Id; p1: Id };
-    if (state.selection.has(g.id) && (p0 === pointId || p1 === pointId)) return true;
+
+// Global functions for each render
+const _onMouseEnter = (e: KonvaEventObject<MouseEvent>) => { setCursor(e, "grab") }
+const _onMouseLeave = (e: KonvaEventObject<MouseEvent>) => { setCursor(e, Config.viewport.cursor) }
+const _onDragStart = (e: KonvaEventObject<MouseEvent>, g: Geometry) => {
+  setCursor(e, "grabbing");
+  if (state.selection.has(g.id)) {
+    // Move all selection logic
+  } else {
+    selectOnly(g.id);
   }
-  return false;
-};
+}
+const _onDragEnd = (e: KonvaEventObject<MouseEvent>) => { setCursor(e, "grab") }
 
 export function renderLine(
   g: Geometry,
@@ -58,26 +61,30 @@ export function renderLine(
       stroke={selected ? style.selectedStroke : style.stroke}
       strokeWidth={selected ? style.selectedWidth : style.width}
       strokeScaleEnabled={false}
-      hitStrokeWidth={Math.max(style.baseHit / Math.max(zoom, 0.01), 1)}
+      hitStrokeWidth={Math.max((style.baseHit * 0.2) / Math.max(zoom, 0.01), 1)}
       attrs={{ geomId: g.id }}
       draggable
-      onMouseEnter={(e) => setCursor(e, "grab")}
-      onMouseLeave={(e) => setCursor(e, "default")}
-      onDragStart={(e) => setCursor(e, "grabbing")}
-      onDragEnd={(e) => setCursor(e, "grab")}
+      onMouseEnter={_onMouseEnter}
+      onMouseLeave={_onMouseLeave}
+      onDragStart={(e) => _onDragStart(e, g)}
+      onDragEnd={_onDragEnd}
       onDragMove={(e) => {
         const stage = e.target.getStage();
-        const scale = stage ? stage.scaleX() || 1 : 1;     // zoom
+        const scale = stage ? stage.scaleX() || 1 : 1;
         const dx = e.evt.movementX / scale;
         const dy = e.evt.movementY / scale;
 
-        const line = ctx.getGeom(g.id)!;
-        const { p0, p1 } = (line.payload as any).data;
-        if (typeof p0 === "string" && typeof p1 === "string") {
-          const P0 = (ctx.getGeom(p0)!.payload as any).data as PointData;
-          const P1 = (ctx.getGeom(p1)!.payload as any).data as PointData;
-          ctx.onPointMove(p0, { x: P0.x + dx, y: P0.y + dy });
-          ctx.onPointMove(p1, { x: P1.x + dx, y: P1.y + dy });
+        const pts = selectedPointIds();
+        if (pts.size === 0) {
+          // fallback: only the grabbed line's endpoints
+          const { p0, p1 } = (ctx.getGeom(g.id)!.payload as any).data;
+          if (typeof p0 === "string") pts.add(p0);
+          if (typeof p1 === "string") pts.add(p1);
+        }
+
+        for (const pid of pts) {
+          const P = (ctx.getGeom(pid)!.payload as any).data as PointData;
+          ctx.onPointMove(pid, { x: P.x + dx, y: P.y + dy });
         }
 
         e.target.position({ x: 0, y: 0 }); // keep node anchored
@@ -94,12 +101,12 @@ export function renderPoint(
   zoom: number
 ) {
   const { x, y } = (g.payload as any).data as PointData;
-  const selected = state.selection.has(g.id) || pointSelectedViaLine(ctx, g.id);
+  const selected = state.selection.has(g.id) || pointSelectedViaLine(g.id);
 
   const z = Math.max(Number.isFinite(zoom) ? zoom : 1, 0.01);
   const baseR = Number(selected ? style.selectedRadius : style.radius) || 6; // from config
-  const radius = baseR / z;                             // screen-fixed size
-  const hit = Math.max((baseR * 3) / z, 6);             // comfy hit area
+  const radius = baseR / z; // screen-fixed size
+  const hit = Math.max((baseR * 3) / z, 6); // comfy hit area
 
   return (
     <Circle
@@ -109,10 +116,10 @@ export function renderPoint(
       y={y}
       radius={radius}
       draggable
-      onMouseEnter={(e) => setCursor(e, "pointer")}  // or "move" if you prefer
-      onMouseLeave={(e) => setCursor(e, "default")}
-      onDragStart={(e) => setCursor(e, "grabbing")}
-      onDragEnd={(e) => setCursor(e, "pointer")}
+      onMouseEnter={_onMouseEnter}
+      onMouseLeave={_onMouseLeave}
+      onDragStart={(e) => _onDragStart(e, g)}
+      onDragEnd={_onDragEnd}
       onDragMove={(e) => ctx.onPointMove(g.id as Id, e.target.position())}
       hitStrokeWidth={hit}
       stroke={selected ? style.selectedStroke : style.stroke}

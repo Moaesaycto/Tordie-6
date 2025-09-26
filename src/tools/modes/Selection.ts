@@ -10,16 +10,16 @@ const dragLassoThreshold = () => Config.modes.drag_lasso_threshold ?? 4;
 
 type SelectModeDeps = {
   stage: Konva.Stage;
-  layer: Konva.Layer;     // kept for the rect; hit-testing uses stage
+  layer: Konva.Layer; // kept for the rect; hit-testing uses stage
   sel: Konva.Rect;
-  ns: string;             // e.g. ".selectTool"
+  ns: string; // e.g. ".selectTool"
 };
 
 export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () => void {
   void layer; // Unused for now
 
-  let selecting = false;      // we are in potential lasso interaction
-  let armed = false;          // armed but not visible until threshold
+  let selecting = false; // we are in potential lasso interaction
+  let armed = false; // armed but not visible until threshold
   let x1 = 0, y1 = 0;
 
   stage.container().style.cursor = "crosshair";
@@ -163,3 +163,13 @@ export function enableSelectMode({ stage, layer, sel, ns }: SelectModeDeps): () 
     window.removeEventListener("mouseup", onWindowUp);
   };
 }
+
+
+export const pointSelectedViaLine = (pointId: Id) => {
+  for (const g of state.diagram.geoms.values()) {
+    if (g.payload.kind !== "line") continue;
+    const { p0, p1 } = g.payload.data as { p0: Id; p1: Id };
+    if (state.selection.has(g.id) && (p0 === pointId || p1 === pointId)) return true;
+  }
+  return false;
+};

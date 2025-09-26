@@ -48,7 +48,6 @@ export function handleSelectClick(id: Id, evt: MouseEvent) {
   else selectOnly(id);
 }
 
-// A) Replace instance (simple)
 export function loadDiagramReplace(json: any) {
   void json // FIXME: Actually implement this
   const d = makeDiagram();
@@ -58,7 +57,6 @@ export function loadDiagramReplace(json: any) {
   state.diagram = d; // swap; subscribers update
 }
 
-// B) Mutate in place (preserve identity, selections)
 export function loadDiagramInPlace(json: any) {
   void json // FIXME: Actually implement this
   const d = state.diagram;
@@ -91,9 +89,14 @@ export function seedDiagramIfEmpty() {
 
   const p0 = d.createGeometry({ kind: "point", data: { x: 140, y: 160 } });
   const p1 = d.createGeometry({ kind: "point", data: { x: 320, y: 240 } });
-  const L = d.createGeometry({ kind: "line", data: { p0, p1 } });
+  const L1 = d.createGeometry({ kind: "line", data: { p0, p1 } });
 
-  d.createItem({ name: "L", geometry: L });
+  const q0 = d.createGeometry({ kind: "point", data: { x: 150, y: 170 } });
+  const q1 = d.createGeometry({ kind: "point", data: { x: 330, y: 240 } });
+  const L2 = d.createGeometry({ kind: "line", data: { p0: q0, p1: q1 } });
+
+  d.createItem({ name: "L", geometry: L1 });
+  d.createItem({ name: "L", geometry: L2 });
 
   d.invalidate();
 }
@@ -144,4 +147,21 @@ export function applySelection(baseIds: Id[], evt?: MouseEvent) {
   }
   // shift-add
   ids.forEach(id => state.selection.add(id));
+}
+
+export function selectedPointIds(): Set<Id> {
+  const out = new Set<Id>();
+  const d = state.diagram;
+  for (const id of state.selection) {
+    const g = d.geoms.get(id);
+    if (!g) continue;
+    if (g.payload.kind === "point") out.add(id);
+    if (g.payload.kind === "line") {
+      const { p0, p1 } = g.payload.data as { p0: Id | PointData; p1: Id | PointData };
+      if (typeof p0 === "string") out.add(p0);
+      if (typeof p1 === "string") out.add(p1);
+    }
+    // extend here for other kinds (e.g. groups) if needed
+  }
+  return out;
 }

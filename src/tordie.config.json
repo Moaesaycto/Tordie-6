@@ -12,6 +12,9 @@
         "paddingX": 300,
         "paddingY": 300
     },
+    "viewport": {
+        "cursor": "crosshair"
+    },
     "geometry": {
         "stroke": {
             "dark": "#ffffff",
