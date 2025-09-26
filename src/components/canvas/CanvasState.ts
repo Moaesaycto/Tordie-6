@@ -91,8 +91,8 @@ export function seedDiagramIfEmpty() {
   const p1 = d.createGeometry({ kind: "point", data: { x: 320, y: 240 } });
   const L1 = d.createGeometry({ kind: "line", data: { p0, p1 } });
 
-  const q0 = d.createGeometry({ kind: "point", data: { x: 150, y: 170 } });
-  const q1 = d.createGeometry({ kind: "point", data: { x: 330, y: 240 } });
+  const q0 = d.createGeometry({ kind: "point", data: { x: 330, y: 170 } });
+  const q1 = d.createGeometry({ kind: "point", data: { x: 150, y: 240 } });
   const L2 = d.createGeometry({ kind: "line", data: { p0: q0, p1: q1 } });
 
   d.createItem({ name: "L", geometry: L1 });

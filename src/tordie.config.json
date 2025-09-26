@@ -45,6 +45,7 @@
         "default_dark_background": "#1e1e1f"
     },
     "modes": {
-        "drag_lasso_threshold": 4
+        "drag_lasso_threshold": 4,
+        "debug_select": false
     }
 }

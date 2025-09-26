@@ -72,18 +72,18 @@ export const segIntersectsRect = (
 
 
 export const lineIntersectsRectWithTolerance = (
-    line: Konva.Line,
-    rAbs: { x: number; y: number; width: number; height: number },
-    _stage: Konva.Stage
+  line: Konva.Line,
+  rStage: { x: number; y: number; width: number; height: number },
+  stage: Konva.Stage
 ) => {
+  const toStage = stage.getAbsoluteTransform().copy().invert()
+    .multiply(line.getAbsoluteTransform().copy()); // node -> stage
 
-    const t = line.getAbsoluteTransform();
-    const pts = line.points();
-
-    for (let i = 0; i + 3 < pts.length; i += 2) {
-        const p0 = t.point({ x: pts[i], y: pts[i + 1] });
-        const p1 = t.point({ x: pts[i + 2], y: pts[i + 3] });
-        if (segIntersectsRect(p0.x, p0.y, p1.x, p1.y, rAbs)) return true;
-    }
-    return false;
+  const pts = line.points(); // local coords
+  for (let i = 0; i + 3 < pts.length; i += 2) {
+    const p0 = toStage.point({ x: pts[i],     y: pts[i + 1] });
+    const p1 = toStage.point({ x: pts[i + 2], y: pts[i + 3] });
+    if (segIntersectsRect(p0.x, p0.y, p1.x, p1.y, rStage)) return true;
+  }
+  return false;
 };

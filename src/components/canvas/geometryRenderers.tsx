@@ -1,11 +1,13 @@
 import { Line as KLine, Circle } from "react-konva";
 import type { Geometry, GeometryData, PointData } from "@/domain/Geometry/Geometry";
 import type { Id } from "@/lib/objects";
-import { selectedPointIds, selectOnly, state } from "@/components/canvas/CanvasState";
+import { applySelection, selectedPointIds, selectOnly, state } from "@/components/canvas/CanvasState";
 import { KonvaEventObject } from "konva/lib/Node";
 import Config from "@/tordie.config.json";
 import { pointSelectedViaLine } from "@/tools/modes/Selection";
 import { setCursor } from "@/lib/utils";
+import { flushSync } from "react-dom";
+import { useSnapshot } from "valtio";
 
 export type GeometryStyle = {
   stroke: string,
@@ -40,18 +42,24 @@ const _onDragStart = (e: KonvaEventObject<MouseEvent>, g: Geometry) => {
   }
 }
 const _onDragEnd = (e: KonvaEventObject<MouseEvent>) => { setCursor(e, "grab") }
+const _onMouseDown = (e: KonvaEventObject<MouseEvent>, g: Geometry) => {
+  flushSync?.(() => applySelection([g.id], e.evt as MouseEvent));
+  e.cancelBubble = true;
+  e.target.getLayer()?.batchDraw();
+}
 
-export function renderLine(
+type RendererProps = {
   g: Geometry,
   ctx: RenderCtx,
   style: GeometryStyle,
-  zoom: number
-) {
+  zoom: number,
+  selected: boolean,
+}
+
+export function renderLine({ g, ctx, style, zoom, selected }: RendererProps) {
   const { p0, p1 } = (g.payload as any).data;
   const a = resolvePoint(ctx, p0);
   const b = resolvePoint(ctx, p1);
-
-  const selected = state.selection.has(g.id);
 
   return (
     <KLine
@@ -61,13 +69,14 @@ export function renderLine(
       stroke={selected ? style.selectedStroke : style.stroke}
       strokeWidth={selected ? style.selectedWidth : style.width}
       strokeScaleEnabled={false}
-      hitStrokeWidth={Math.max((style.baseHit * 0.2) / Math.max(zoom, 0.01), 1)}
+      hitStrokeWidth={Math.max((style.baseHit * 0.3) / Math.max(zoom, 0.01), 1)}
       attrs={{ geomId: g.id }}
       draggable
       onMouseEnter={_onMouseEnter}
       onMouseLeave={_onMouseLeave}
       onDragStart={(e) => _onDragStart(e, g)}
       onDragEnd={_onDragEnd}
+      onMouseDown={(e) => _onMouseDown(e, g)}
       onDragMove={(e) => {
         const stage = e.target.getStage();
         const scale = stage ? stage.scaleX() || 1 : 1;
@@ -94,26 +103,18 @@ export function renderLine(
   );
 }
 
-export function renderPoint(
-  g: Geometry,
-  ctx: RenderCtx,
-  style: GeometryStyle,
-  zoom: number
-) {
+export function renderPoint({ g, ctx, style, zoom, selected }: RendererProps) {
   const { x, y } = (g.payload as any).data as PointData;
-  const selected = state.selection.has(g.id) || pointSelectedViaLine(g.id);
-
   const z = Math.max(Number.isFinite(zoom) ? zoom : 1, 0.01);
-  const baseR = Number(selected ? style.selectedRadius : style.radius) || 6; // from config
-  const radius = baseR / z; // screen-fixed size
-  const hit = Math.max((baseR * 3) / z, 6); // comfy hit area
+  const baseR = Number(selected ? style.selectedRadius : style.radius) || 6;
+  const radius = baseR / z;
+  const hit = Math.max((baseR * 3) / z, 6);
 
   return (
     <Circle
       key={g.id}
       name="selectable"
-      x={x}
-      y={y}
+      x={x} y={y}
       radius={radius}
       draggable
       onMouseEnter={_onMouseEnter}
@@ -124,7 +125,7 @@ export function renderPoint(
       hitStrokeWidth={hit}
       stroke={selected ? style.selectedStroke : style.stroke}
       strokeWidth={1}
-      strokeScaleEnabled={false} // 1px stroke stays 1px
+      strokeScaleEnabled={false}
       fill={selected ? style.selectedStroke : style.stroke}
       attrs={{ geomId: g.id }}
     />
@@ -132,16 +133,15 @@ export function renderPoint(
 }
 
 
-// Optional registry if you want a single entry point
-export function renderGeometry(
-  g: Geometry,
-  ctx: RenderCtx,
-  style: GeometryStyle,
-  zoom: number
-) {
-  switch ((g.payload as any).kind) {
-    case "line": return renderLine(g, ctx, style, zoom);
-    case "point": return renderPoint(g, ctx, style, zoom);
+
+export function GeometryNode({ g, ctx, style, zoom }: Omit<RendererProps, "selected">) {
+  const snap = useSnapshot(state);
+  const selected = snap.selection.has(g.id) || pointSelectedViaLine(g.id); // include line-linked
+
+  const props = { g, ctx, style, zoom, selected };
+  switch (g.payload.kind) {
+    case "line": return renderLine(props);
+    case "point": return renderPoint(props);
     default: return null;
   }
 }

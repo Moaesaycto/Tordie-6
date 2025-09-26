@@ -8,7 +8,7 @@ import { useViewportControls } from '@/components/hooks/viewport/useViewportCont
 import { useDocument } from '@/components/document-provider';
 import { readableTextColour } from '@/lib/color';
 import type { Geometry } from '@/domain/Geometry/Geometry';
-import { GeometryStyle, RenderCtx, renderGeometry } from '@/components/canvas/geometryRenderers';
+import { GeometryStyle, RenderCtx, GeometryNode } from '@/components/canvas/geometryRenderers';
 import Config from "@/tordie.config.json";
 import { useTheme } from '@/components/theme-provider';
 
@@ -27,7 +27,7 @@ export const style = (resolved?: string): GeometryStyle => {
   };
 };
 
-export function DiagramLayer({ geoms, ctx }: { geoms: Geometry[]; ctx: RenderCtx }) {
+export function DiagramLayer({ ctx }: { geoms: Geometry[]; ctx: RenderCtx }) {
   const { resolvedTheme } = useTheme();
 
   const ui = useSnapshot(state);
@@ -36,7 +36,11 @@ export function DiagramLayer({ geoms, ctx }: { geoms: Geometry[]; ctx: RenderCtx
     ? (rawZoom as number)
     : 1; // safe fallback
 
-  return <>{geoms.map(g => renderGeometry(g, ctx, style(resolvedTheme), zoom))}</>;
+  return <>
+    {Array.from(state.diagram.geoms.values()).map(g => (
+      <GeometryNode key={g.id} g={g} ctx={ctx} style={style(resolvedTheme)} zoom={zoom} />
+    ))}
+  </>;
 }
 
 export default function Viewport() {

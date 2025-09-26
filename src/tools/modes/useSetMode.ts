@@ -32,7 +32,7 @@ export function useSetMode(mode: Mode | null) {
 
     switch (mode) {
       case 'select':
-        cleanup = enableSelectMode({ stage, layer, sel, tr, ns: NS });
+        cleanup = enableSelectMode({ stage, layer, sel, ns: NS });
         break;
 
       // add other modes here (pan/draw/etc.)
