@@ -13,11 +13,13 @@ import { useAppState } from "@/components/state-provider"
 import { useLoad } from "@/services/load"
 import useSave from "@/services/save"
 import { useDocument } from "@/components/document-provider"
+import { canRedo, canUndo } from "@/services/history"
 
 export function HeaderMenubar() {
   return (
     <Menubar className="rounded-none w-full p-0 gap-0 h-auto min-h-0" loop>
       <FileMenu />
+      <EditMenu />
       <ViewMenu />
       <HelpHemu />
     </Menubar>
@@ -25,7 +27,7 @@ export function HeaderMenubar() {
 }
 
 const FileMenu = () => {
-  const modKey = useKeyHint()
+  const modKey = useKeyHint();
   const { setCurrentState } = useAppState();
   const { save, saveAs } = useSave();
   const { load } = useLoad();
@@ -74,6 +76,34 @@ const FileMenu = () => {
     </MenubarMenu>
   )
 }
+
+
+const EditMenu = () => {
+  const modKey = useKeyHint();
+
+  return (
+    <MenubarMenu>
+      <CompactTrigger>Edit</CompactTrigger>
+      <CompactContent>
+        <CompactItem
+          shortcut={formatKeyHint([modKey, "z"])}
+          onClick={() => { }}
+          disabled={canUndo()}
+        >
+          Undo
+        </CompactItem>
+        <CompactItem
+          shortcut={formatKeyHint([modKey, "shift", "z"])}
+          onClick={() => { }}
+          disabled={canRedo()}
+        >
+          Redo
+        </CompactItem>
+      </CompactContent>
+    </MenubarMenu>
+  )
+}
+
 
 const ViewMenu = () => {
   const { theme, setTheme, textSize, setTextSize } = useTheme()

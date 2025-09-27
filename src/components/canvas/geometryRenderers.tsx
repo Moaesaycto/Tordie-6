@@ -57,6 +57,7 @@ type RendererProps = {
 }
 
 export function renderLine({ g, ctx, style, zoom, selected }: RendererProps) {
+  void zoom;
   const { p0, p1 } = (g.payload as any).data;
   const a = resolvePoint(ctx, p0);
   const b = resolvePoint(ctx, p1);
@@ -69,7 +70,7 @@ export function renderLine({ g, ctx, style, zoom, selected }: RendererProps) {
       stroke={selected ? style.selectedStroke : style.stroke}
       strokeWidth={selected ? style.selectedWidth : style.width}
       strokeScaleEnabled={false}
-      hitStrokeWidth={Math.max((style.baseHit * 0.3) / Math.max(zoom, 0.01), 1)}
+      hitStrokeWidth={style.baseHit}
       attrs={{ geomId: g.id }}
       draggable
       onMouseEnter={_onMouseEnter}
@@ -108,7 +109,6 @@ export function renderPoint({ g, ctx, style, zoom, selected }: RendererProps) {
   const z = Math.max(Number.isFinite(zoom) ? zoom : 1, 0.01);
   const baseR = Number(selected ? style.selectedRadius : style.radius) || 6;
   const radius = baseR / z;
-  const hit = Math.max((baseR * 3) / z, 6);
 
   return (
     <Circle
@@ -122,7 +122,7 @@ export function renderPoint({ g, ctx, style, zoom, selected }: RendererProps) {
       onDragStart={(e) => _onDragStart(e, g)}
       onDragEnd={_onDragEnd}
       onDragMove={(e) => ctx.onPointMove(g.id as Id, e.target.position())}
-      hitStrokeWidth={hit}
+      hitStrokeWidth={style.baseHit}
       stroke={selected ? style.selectedStroke : style.stroke}
       strokeWidth={1}
       strokeScaleEnabled={false}
