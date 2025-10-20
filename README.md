@@ -1,5 +1,7 @@
 # Tordie 6 Source Code
 
+**Type:** Canvas Application · **Tech Stack:** Tauri / Valtio / Canva / React · **Status:** Active
+
 ## Introduction
 
 Tordie is a powerful SVG generator with mathematical operations for use in Origami and scoring. This version has since been deprecated with plans for a web version in the near future.
