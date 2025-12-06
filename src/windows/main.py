@@ -28,8 +28,13 @@ class MainWindow(QMainWindow):
         central.setLayout(layout)
 
         splitter = QSplitter()
-        for p in [ToolWindow, CanvasWindow, ControllerWindow]:
+        for i, p in enumerate([
+            ToolWindow,
+            CanvasWindow,
+            ControllerWindow
+        ]):
             splitter.addWidget(p(self))
+            splitter.setStretchFactor(i, i % 2)
 
         layout.addWidget(splitter)
         self.setCentralWidget(central)
@@ -54,7 +59,7 @@ class CanvasWindow(QGraphicsView):
         self.setScene(scene)
 
         # Contents will go here
-        scene.addRect(0, 0, 800, 600)
+        scene.addRect(0, 0, 800, 600, brush=Qt.white)
 
 
 class ToolWindow(QFrame):
