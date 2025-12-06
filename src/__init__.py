@@ -14,6 +14,8 @@ from src.windows.main import MainWindow
 
 def main():
     app = QApplication(sys.argv)
+    splash = SplashScreen()
+    splash.show()
 
     config = configparser.ConfigParser()
     config.read(resource_path('config.ini'))
@@ -24,18 +26,12 @@ def main():
     if config.get('app', 'debug'):
         logger.warn("Debug mode is active")
 
-    splash = SplashScreen()
-    splash.show()
-
     # Connecting discord
     discord_cleanup = None
 
     def setup_discord_async():
         global discord_cleanup
-        try:
-            discord_cleanup = discord_setup(config.getboolean('app', 'debug'))
-        except:
-            pass
+        discord_cleanup = discord_setup(config.getboolean('app', 'debug'))
 
     QTimer.singleShot(500, setup_discord_async)
 
@@ -51,12 +47,9 @@ def main():
     # Setting up main window
     window = MainWindow()
 
-    QTimer.singleShot(1000, lambda: (splash.close(), window.show()))
 
     app.aboutToQuit.connect(cleanup)
-
-    logger.info("QApplication initialized")
-
+    
+    QTimer.singleShot(1000, lambda: (logger.info("QApplication initialized"), splash.close(), window.show()))
     sys.exit(app.exec())
-
     return app
