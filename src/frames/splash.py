@@ -19,6 +19,7 @@ class SplashScreen(QWidget):
 
         self.svg = QSvgWidget(resource_path("src/assets/vectors/splashscreen.svg"), self)
         self.svg.resize(400, 300)
+        self.svg.setStyleSheet("background-color: white; border-radius: 15px;")
 
         self.label = QLabel("TORDIE 6", self)
         self.label.setFont(QFont("Bahnschrift", 24))

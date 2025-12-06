@@ -14,5 +14,6 @@ from src import main
 import sys
 
 if __name__ == "__main__":
+   sys.argv += ['-platform', 'windows:darkmode=2']
    app = main()
    sys.exit(app.exec())
