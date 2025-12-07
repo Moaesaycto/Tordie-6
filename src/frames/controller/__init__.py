@@ -1,8 +1,8 @@
 from PySide6.QtWidgets import (
-    QWidget, QFrame, QVBoxLayout, QLabel, QHBoxLayout, QTabWidget, QWidget, QLabel
+    QWidget, QFrame, QVBoxLayout, QLabel, QHBoxLayout, QTabWidget, QLabel, QSplitter
 )
 from PySide6.QtGui import QIcon, QPixmap, QTransform
-from PySide6.QtCore import QSize
+from PySide6.QtCore import QSize, Qt
 from src.utils.os import resource_path
 
 
@@ -36,11 +36,24 @@ class TabFrame(QFrame):
 class ControllerFrame(QFrame):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
+        self.splitter = QSplitter(Qt.Vertical)
+        self.splitter.addWidget(OutlinerFrame())
+
+        self.splitter.addWidget(PropertiesFrame())
+
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
+        self.layout.addWidget(self.splitter)
+
+
+class OutlinerFrame(QFrame):
+    def __init__(self, parent: QWidget = None):
+        super().__init__(parent)
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.layout.addWidget(QLabel("Hello"))
-        self.layout.addWidget(PropertiesFrame())
 
 
 class PropertiesFrame(QFrame):
