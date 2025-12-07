@@ -41,7 +41,7 @@ class MainWindow(QMainWindow):
         self.splitter = QSplitter()
         for i, p in enumerate([ToolFrame, CanvasFrame, ControllerFrame]):
             self.splitter.addWidget(p(self))
-            self.splitter.setStretchFactor(i, i % 2)
+            self.splitter.setStretchFactor(i, 0)
         self.layout.addWidget(self.splitter)
 
     def rebuild_ui(self):

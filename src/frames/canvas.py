@@ -13,3 +13,4 @@ class CanvasFrame(QGraphicsView):
 
         # Contents will go here
         scene.addRect(0, 0, 800, 600, brush=Qt.white)
+        

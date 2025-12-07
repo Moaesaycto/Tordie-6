@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (
-    QWidget, QFrame, QVBoxLayout, QLabel, QPushButton, QSizePolicy
+    QWidget, QFrame, QVBoxLayout, QLabel, QPushButton, QSizePolicy, QStyle
 )
 from PySide6.QtCore import Qt
 
@@ -15,7 +15,7 @@ class ToolFrame(QFrame):
     def __init__(self, parent: QWidget = None):
         super().__init__(parent)
         self.setFrameShape(QFrame.StyledPanel)
-        self.setMinimumWidth(80)
+        self.setFixedWidth(80)
         layout = QVBoxLayout()
         layout.setContentsMargins(4, 4, 4, 4)
         self.setLayout(layout)
