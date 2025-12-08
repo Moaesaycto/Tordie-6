@@ -61,6 +61,10 @@ class OutlinerFrame(QFrame):
         self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(0)
 
+        label = QLabel("Diagram Collection")
+        label.setStyleSheet("padding: 5px;")
+        self.layout.addWidget(label)
+
         tree = QTreeWidget()
         tree.setHeaderHidden(True)
         tree.setDragEnabled(True)
@@ -75,10 +79,10 @@ class OutlinerFrame(QFrame):
 
         colors = ["point", "line", "circle", "parametric", "default", "group"]
         for i, color in enumerate(colors):
-            child_item = QTreeWidgetItem(tree)  # Add directly to tree
+            child_item = QTreeWidgetItem(tree)
             child_item.setData(
                 0, Qt.UserRole, {"text": f"Item {i+1}", "color": color})
-            
+
             if color not in self.SUPPORTS_CHILDREN:
                 child_item.setFlags(child_item.flags() & ~Qt.ItemIsDropEnabled)
 
@@ -185,7 +189,7 @@ class PropertiesFrame(QFrame):
             }}
 
             QTabBar::tab:first {{
-                margin-top: 3px;
+                margin-top: 28px;
             }}
             
             QTabBar::tab:last {{
