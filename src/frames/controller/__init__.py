@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (
     QWidget, QFrame, QVBoxLayout, QLabel, QHBoxLayout, QTabWidget, QLabel, QSplitter,
-    QListWidget, QListWidgetItem, QTreeWidget, QTreeWidgetItem
+    QTreeWidget, QTreeWidgetItem
 )
 from PySide6.QtGui import QIcon, QPixmap, QTransform
 from PySide6.QtCore import QSize, Qt
@@ -144,31 +144,26 @@ class PropertiesFrame(QFrame):
                 "title": "Scripts",
                 "icon": "src/assets/icons/scripts_tab.svg",
                 "frame": ScriptsControllerFrame,
-                "color": "#A9575F"
             },
             {
                 "title": "Modifiers",
                 "icon": "src/assets/icons/modifiers_tab.svg",
                 "frame": ModifierControllerFrame,
-                "color": "#6387D2",
             },
             {
                 "title": "Geometry",
                 "icon": "src/assets/icons/geometry_tab.svg",
                 "frame": GeometryControllerFrame,
-                "color": "#099A78"
             },
             {
                 "title": "Document",
                 "icon": "src/assets/icons/document_tab.svg",
                 "frame": DocumentControllerFrame,
-                "color": "#099A78"
             },
             {
                 "title": "Settings",
                 "icon": "src/assets/icons/settings_tab.svg",
                 "frame": SettingsControllerFrame,
-                "color": "#099A78"
             },
         ]
 
@@ -204,7 +199,7 @@ class PropertiesFrame(QFrame):
             }}
         """
         for i, c in enumerate(CONTROLLER_TABS):
-            style += f"QTabBar::tab:nth-child({i + 1}) {{ background: {c['color']}; }}\n"
+            # style += f"QTabBar::tab:nth-child({i + 1}) {{ background: {c['color']}; }}\n"
             tab = c['frame'](self)
             pix = QPixmap(resource_path(c['icon']))
             pix = pix.transformed(QTransform().rotate(90))

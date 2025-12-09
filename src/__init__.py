@@ -13,8 +13,7 @@ from src.frames.main import MainWindow
 
 
 def _debug_setup(window: QWidget):
-    shortcut = QShortcut(QKeySequence("Ctrl+R"), window)
-    shortcut.activated.connect(window.rebuild_ui)
+    pass
 
 
 def main():
