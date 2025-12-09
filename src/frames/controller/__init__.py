@@ -132,6 +132,9 @@ class OutlinerFrame(QFrame):
 
         recreate_recursive(self.tree.invisibleRootItem())
 
+    def sizeHint(self):
+        return QSize(self.width(), 50)
+
 
 class PropertiesFrame(QFrame):
     def __init__(self, parent: QWidget = None):
